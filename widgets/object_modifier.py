@@ -12,7 +12,16 @@ from PyQt6.QtWidgets import (
     QToolButton,
     QGraphicsItemGroup,
 )
-from PyQt6.QtGui import QPixmap, QPen, QBrush, QPainter, QIcon, QWheelEvent, QMouseEvent
+from PyQt6.QtGui import (
+    QPixmap,
+    QPen,
+    QBrush,
+    QPainter,
+    QIcon,
+    QWheelEvent,
+    QMouseEvent,
+    QKeyEvent,
+)
 from PyQt6.QtCore import Qt, QEvent, QRectF, QPoint, QPointF
 from utils.object import Object
 
@@ -246,6 +255,19 @@ class PolygonDrawer(QWidget):
             self.last_line = None
         self.confirm_polygon_button.setVisible(True)
         self.drawing_mode = 0
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key.Key_Delete:
+            deleted_items = [[], []]
+            for frame_type in range(2):
+                for polygon in self.polygons[frame_type]:
+                    if polygon.isSelected():
+                        self.scene.removeItem(polygon)
+                        deleted_items[frame_type].append(polygon)
+            for frame_type in range(2):
+                for item in deleted_items[frame_type]:
+                    self.polygons[frame_type].remove(item)
+        return super().keyPressEvent(event)
 
 
 class ZoomPanGraphicsView(QGraphicsView):

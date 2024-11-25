@@ -1,1 +1,1 @@
-app_name = "Monintel"
+app_name = "Jinada"

@@ -1,5 +1,4 @@
 from PyQt6.QtWidgets import (
-    QApplication,
     QMainWindow,
     QDockWidget,
 )
@@ -31,10 +30,3 @@ class MainWindow(QMainWindow):
         self.objects_container = ObjectsContainer()
         self.objects_container.list.addItems(["Video 1", "Video 2", "Video 3"])
         self.dock_widget.setWidget(self.objects_container)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
