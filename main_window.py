@@ -3,10 +3,10 @@ from PyQt6.QtWidgets import (
     QDockWidget,
 )
 from PyQt6.QtCore import QSize, QThreadPool, Qt
-import sys
 import utils.constants as constants
 from widgets.object_view import ObjectView
 from widgets.objects_container import ObjectsContainer
+from local_db.db import get_object_by_id
 
 
 class MainWindow(QMainWindow):
@@ -28,5 +28,8 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dock_widget)
 
         self.objects_container = ObjectsContainer()
-        self.objects_container.list.addItems(["Video 1", "Video 2", "Video 3"])
+        self.objects_container.communicator.item_clicked.connect(self.load_object_view)
         self.dock_widget.setWidget(self.objects_container)
+
+    def load_object_view(self, object_id):
+        self.central_widget.load_object(object_id)

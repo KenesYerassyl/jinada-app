@@ -1,6 +1,5 @@
 from PyQt6.QtWidgets import QApplication
 from main_window import MainWindow
-from utils.db import Database
 import sys
 
 # from PyQt6.QtCore import Qt, QSize, QTimer, QThread, QThreadPool
@@ -122,11 +121,6 @@ import sys
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    database = Database()
-
-    if not database.open_connection():
-        sys.exit(1)
-
     window = MainWindow()
     window.show()
-    app.exec()
+    sys.exit(app.exec())
