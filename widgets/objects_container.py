@@ -34,7 +34,10 @@ class ObjectContainerModel(QAbstractListModel):
             return self.objects[index]
         return None
 
-    def add_object(self, object, object_record):
+    def add_object(self, name, file_path, frame_path, in_frame, out_frame):
+        object = Object(name, frame_path, in_frame, out_frame)
+        # TODO process recording
+        object_record = ObjectRecord(file_path)
         insert_object_and_record(object, object_record)
         self.refresh()
 
@@ -65,29 +68,24 @@ class ObjectsContainer(QWidget):
 
         self.setLayout(self.object_layout)
 
-    def invoke_object_uploader_dialog(
-        self, object: Object, object_record: ObjectRecord = None
-    ):
-        object_uploader_dialog = ObjectUploaderDialog(object, self, object_record)
+    def invoke_object_uploader_dialog(self):
+        object_uploader_dialog = ObjectUploaderDialog(parent=self)
         object_uploader_dialog.communicator.object_uploaded.connect(
             self.invoke_object_modifier_dialog
         )
         object_uploader_dialog.open()
 
-    def invoke_object_modifier_dialog(
-        self, object: Object, object_record: ObjectRecord = None
-    ):
-        object_modifier_dialog = ObjectModifierDialog(object, self, object_record)
+    def invoke_object_modifier_dialog(self, file_path, frame_path):
+        object_modifier_dialog = ObjectModifierDialog(
+            file_path, frame_path, parent=self
+        )
         object_modifier_dialog.communicator.object_modification_cancelled.connect(
             self.invoke_object_uploader_dialog
         )
-        object_modifier_dialog.communicator.object_modified.connect(self.add_new_object)
+        object_modifier_dialog.communicator.object_modified.connect(
+            self.model.add_object
+        )
         object_modifier_dialog.open()
-
-    def add_new_object(self, object: Object, object_record: ObjectRecord):
-        # TODO Process the recording
-
-        self.model.add_object(object, object_record)
 
     def on_item_clicked(self, index):
         object_index = self.model.data(index, Qt.ItemDataRole.UserRole)

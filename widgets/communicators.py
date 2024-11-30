@@ -1,11 +1,10 @@
 from PyQt6.QtCore import QObject, pyqtSignal
-from local_db.object import Object, ObjectRecord
 
 
 class ObjectCommunicator(QObject):
-    object_uploaded = pyqtSignal(Object, ObjectRecord)
-    object_modified = pyqtSignal(Object, ObjectRecord)
-    object_modification_cancelled = pyqtSignal(Object, ObjectRecord)
+    object_uploaded = pyqtSignal(str, str)
+    object_modified = pyqtSignal(str, str, str, list, list)
+    object_modification_cancelled = pyqtSignal()
 
 
 class ObjectContainerCommunicator(QObject):

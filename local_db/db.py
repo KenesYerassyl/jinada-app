@@ -78,3 +78,12 @@ def get_object_name_by_id(object_id):
         if obj:
             return obj.name
         return None
+
+
+def update_object_by_id(object_id, name, in_frame, out_frame):
+    with get_session() as session:
+        obj = session.query(Object).filter_by(id=object_id).first()
+        if obj:
+            obj.name = name
+            obj.in_frame = in_frame
+            obj.out_frame = out_frame

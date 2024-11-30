@@ -19,12 +19,9 @@ class MainWindow(QMainWindow):
         self.central_widget = ObjectView()
         self.setCentralWidget(self.central_widget)
 
-        self.dock_widget = QDockWidget("Item list", self)
+        self.dock_widget = QDockWidget("Object List", self)
         self.dock_widget.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
-        self.dock_widget.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetMovable
-            | QDockWidget.DockWidgetFeature.DockWidgetFloatable
-        )
+        self.dock_widget.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dock_widget)
 
         self.objects_container = ObjectsContainer()
