@@ -27,6 +27,8 @@ from widgets.communicators import ObjectCommunicator
 from widgets.zoompan_graphics_view import ZoomPanGraphicsView
 from utils.pyqtgui_utils import rescale_pixmap, copy_ellipse_item, copy_line_item
 
+# Make sure that name is unique
+
 
 class ObjectModifierDialog(QDialog):
     def __init__(

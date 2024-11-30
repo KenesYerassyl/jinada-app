@@ -10,7 +10,7 @@ from PyQt6.QtGui import QTextCharFormat
 import datetime
 
 
-class DataExporterDialog(QDialog):
+class DatePickerDialog(QDialog):
 
     date_picked = pyqtSignal(datetime.date, datetime.date)
 

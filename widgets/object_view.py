@@ -17,7 +17,7 @@ from local_db.db import (
 from utils.pyqtgui_utils import rescale_pixmap
 from widgets.file_upload import FileUploadWidget
 from widgets.object_modifier import ObjectModifierDialog
-from widgets.data_exporter import DataExporterDialog
+from widgets.date_picker import DatePickerDialog
 
 
 class ObjectView(QScrollArea):
@@ -111,7 +111,7 @@ class ObjectView(QScrollArea):
         object_modifier_dialog.open()
 
     def export_data_button_clicked(self):
-        data_exporter_dialog = DataExporterDialog(self)
+        data_exporter_dialog = DatePickerDialog(self)
         # TODO connect to data_exporter_dialog.date_picked
         data_exporter_dialog.open()
 

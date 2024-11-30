@@ -1,12 +1,14 @@
 import cv2
 import os
 
+# DB File System Handler
+
 
 def save_first_frame(file_path):
     # Add validation, make sure it is video
     result = ()
     file_name, _ = os.path.splitext(os.path.basename(file_path))
-    output_image_path = os.path.join(os.path.dirname(file_path), f"{file_name}.jpg")
+    output_image_path = os.path.join("./local_db/object_frames/", f"{file_name}.jpg")
     try:
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"Video file not found: {file_path}")
