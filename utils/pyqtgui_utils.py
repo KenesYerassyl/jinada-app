@@ -3,13 +3,14 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QGraphicsEllipseItem, QGraphicsLineItem
 
 
-def rescale_pixmap(pixmap: QPixmap) -> QPixmap:
-    target_width = 1280
-
+def rescale_pixmap(pixmap: QPixmap, target_width=1280) -> QPixmap:
     aspect_ratio = pixmap.height() / pixmap.width()
     target_height = int(target_width * aspect_ratio)
     return pixmap.scaled(
-        target_width, target_height, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio
+        target_width,
+        target_height,
+        aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
+        transformMode=Qt.TransformationMode.SmoothTransformation,
     )
 
 

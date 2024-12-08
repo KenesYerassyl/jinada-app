@@ -1,13 +1,21 @@
 import cv2
 import os
+from datetime import datetime
 
 # DB File System Handler
+
+
+def delete_frame(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    else:
+        print("File not found.")
 
 
 def save_first_frame(file_path):
     # Add validation, make sure it is video
     result = ()
-    file_name, _ = os.path.splitext(os.path.basename(file_path))
+    file_name = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     output_image_path = os.path.join("./local_db/object_frames/", f"{file_name}.jpg")
     try:
         if not os.path.exists(file_path):

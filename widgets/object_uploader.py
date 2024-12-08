@@ -7,19 +7,19 @@ from PyQt6.QtWidgets import (
     QLabel,
     QMessageBox,
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from widgets.file_upload import FileUploadWidget
-from local_db.db_fs import save_first_frame
-from widgets.communicators import ObjectCommunicator
+from local_db.db_fs import save_first_frame, delete_frame
 
 
 class ObjectUploaderDialog(QDialog):
+    object_uploaded = pyqtSignal(str, str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("New object upload")
         self.setMaximumWidth(self.width())
         self.setMaximumHeight(self.height())
-        self.communicator = ObjectCommunicator()
         self.file_path = ""
         self.frame_path = ""
 
@@ -69,8 +69,9 @@ class ObjectUploaderDialog(QDialog):
         self.next_button.setDisabled(self.file_path == "" or self.frame_path == "")
 
     def on_next(self):
-        self.communicator.object_uploaded.emit(self.file_path, self.frame_path)
+        self.object_uploaded.emit(self.file_path, self.frame_path)
         self.accept()
 
     def on_cancel(self):
+        delete_frame(self.frame_path)
         self.reject()

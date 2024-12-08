@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.sqlite import JSON
@@ -44,6 +44,7 @@ class ObjectRecord(Base):
     object_id = Column(Integer, ForeignKey("objects.id"), nullable=False)
     file_path = Column(String, nullable=False)
     date_uploaded = Column(DateTime, default=datetime.now())
+    is_processed = Column(Boolean, default=False)
     parent = relationship("Object", back_populates="records")
 
     def __init__(self, file_path="", date_uploaded=None):

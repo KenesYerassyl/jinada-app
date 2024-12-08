@@ -23,14 +23,17 @@ from PyQt6.QtGui import (
 )
 from PyQt6.QtCore import Qt, QEvent, QRectF, pyqtSignal
 from local_db.object import Object
-from widgets.communicators import ObjectCommunicator
 from widgets.zoompan_graphics_view import ZoomPanGraphicsView
 from utils.pyqtgui_utils import rescale_pixmap, copy_ellipse_item, copy_line_item
 
-# Make sure that name is unique
+# TODO: Make sure that name is unique
 
 
 class ObjectModifierDialog(QDialog):
+
+    object_modified = pyqtSignal(str, str, str, list, list)
+    object_modification_cancelled = pyqtSignal()
+
     def __init__(
         self,
         file_path,
@@ -46,7 +49,6 @@ class ObjectModifierDialog(QDialog):
         self.in_frame = in_frame if in_frame != None else []
         self.out_frame = out_frame if out_frame != None else []
         self.name = "" or name
-        self.communicator = ObjectCommunicator()
         self.setWindowTitle("Object modification")
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowCloseButtonHint)
         layout = QVBoxLayout(self)
@@ -105,13 +107,13 @@ class ObjectModifierDialog(QDialog):
                     self.in_frame.append(polygon_frame)
                 else:
                     self.out_frame.append(polygon_frame)
-        self.communicator.object_modified.emit(
+        self.object_modified.emit(
             self.name, self.file_path, self.frame_path, self.in_frame, self.out_frame
         )
         self.accept()
 
     def on_back(self):
-        self.communicator.object_modification_cancelled.emit()
+        self.object_modification_cancelled.emit()
         self.reject()
 
 

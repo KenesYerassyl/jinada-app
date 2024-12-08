@@ -3,14 +3,12 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QLabel,
     QPushButton,
-    QListView,
     QHBoxLayout,
+    QWidget,
 )
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QPolygonF
-from PyQt6.QtCore import Qt, QAbstractListModel, QPointF
+from PyQt6.QtCore import Qt, QPointF
 from local_db.db import (
-    insert_record,
-    get_all_object_records_datetimes,
     get_object_by_id,
     update_object_by_id,
 )
@@ -18,55 +16,74 @@ from utils.pyqtgui_utils import rescale_pixmap
 from widgets.file_upload import FileUploadWidget
 from widgets.object_modifier import ObjectModifierDialog
 from widgets.date_picker import DatePickerDialog
+from widgets.record_list import RecordListWidget
 
 
-class ObjectView(QScrollArea):
+class ObjectView(QWidget):
 
     def __init__(self):
         super().__init__()
         self.setMinimumWidth(800)
-        self.model = ObjectViewModel(self)
 
-        self.object_layout = QVBoxLayout()
-        self.object_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        object_layout = QVBoxLayout()
+        object_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self.object_name = QLabel("Object Frame")
 
         self.object_frame = QLabel("Select an object.")
         self.object_frame.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.tools_layout = QHBoxLayout()
         self.modify_frames_button = QPushButton("Modify Frames")
-        self.modify_frames_button.setDisabled(True)
         self.modify_frames_button.clicked.connect(self.modify_frames_button_clicked)
         self.export_data_button = QPushButton("Export Data")
         self.export_data_button.clicked.connect(self.export_data_button_clicked)
-        self.export_data_button.setDisabled(True)
-        self.tools_layout.addWidget(self.modify_frames_button)
-        self.tools_layout.addWidget(self.export_data_button)
+        tools_layout = QHBoxLayout()
+        tools_layout.addWidget(self.modify_frames_button)
+        tools_layout.addWidget(self.export_data_button)
+
+        self.records_list = RecordListWidget(-1)
 
         self.file_upload = FileUploadWidget()
+        self.file_upload.uploaded.connect(self.records_list.add_record)
+
+        object_layout.addWidget(self.object_name)
+        object_layout.addWidget(self.object_frame)
+        object_layout.addLayout(tools_layout)
+        object_layout.addWidget(self.file_upload)
+        object_layout.addWidget(self.records_list)
+
+        self.container = QWidget()
+        self.container.setLayout(object_layout)
+
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidget(self.container)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOn
+        )
+        self.scroll_area.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        layout = QVBoxLayout()
+        layout.addWidget(self.scroll_area)
+
+        self.setLayout(layout)
+        self.reset()
+
+    def reset(self):
+        self.object_name.setText("Object Frame")
+        self.object_frame.setText("Select an object.")
+        self.modify_frames_button.setDisabled(True)
+        self.export_data_button.setDisabled(True)
         self.file_upload.setHidden(True)
-        # TODO self.file_upload.uploaded.connect()
-
-        self.records_list = QListView()
-        self.records_list.setModel(self.model)
-        # TODO self.records_list.clicked.connect(self.on_item_clicked)
-
-        self.object_layout.addWidget(self.object_name)
-        self.object_layout.addWidget(self.object_frame)
-        self.object_layout.addLayout(self.tools_layout)
-        self.object_layout.addWidget(self.file_upload)
-        self.object_layout.addWidget(self.records_list)
-        self.setLayout(self.object_layout)
+        self.records_list.object_id = -1
+        self.records_list.load_data()
 
     def load_object(self, object_id):
-        self.model.object_id = object_id
-        self.model.refresh()
-        self.load_view()
+        self.records_list.object_id = object_id
+        self.records_list.load_data()
 
-    def load_view(self):
-        object = get_object_by_id(self.model.object_id)
+        object = get_object_by_id(self.records_list.object_id)
         # name
         self.object_name.setText(object["name"])
         # object frame
@@ -95,8 +112,15 @@ class ObjectView(QScrollArea):
         self.export_data_button.setDisabled(False)
         self.file_upload.setHidden(False)
 
+    # def resizeEvent(self, event):
+    #     if self.records_list.object_id != -1:
+    #         self.object_frame.setPixmap(
+    #             rescale_pixmap(self.object_frame.pixmap(), self.object_frame.width())
+    #         )
+    #     return super().resizeEvent(event)
+
     def modify_frames_button_clicked(self):
-        object = get_object_by_id(self.model.object_id)
+        object = get_object_by_id(self.records_list.object_id)
         object_modifier_dialog = ObjectModifierDialog(
             "",
             object["frame_path"],
@@ -105,53 +129,14 @@ class ObjectView(QScrollArea):
             object["out_frame"],
             parent=self,
         )
-        object_modifier_dialog.communicator.object_modified.connect(
-            self.model.modify_object
-        )
+        object_modifier_dialog.object_modified.connect(self.modify_object)
         object_modifier_dialog.open()
+
+    def modify_object(self, name, file_path, frame_path, in_frame, out_frame):
+        update_object_by_id(self.records_list.object_id, name, in_frame, out_frame)
+        self.load_object(self.records_list.object_id)
 
     def export_data_button_clicked(self):
         data_exporter_dialog = DatePickerDialog(self)
         # TODO connect to data_exporter_dialog.date_picked
         data_exporter_dialog.open()
-
-
-class ObjectViewModel(QAbstractListModel):
-
-    def __init__(self, object_view: ObjectView):
-        super().__init__(object_view)
-        self.object_view = object_view
-        self.object_records = []
-        self.object_id = -1
-
-    def rowCount(self, parent=Qt.ItemDataRole.DisplayRole):
-        return len(self.object_records)
-
-    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
-        if not index.isValid() or not (0 <= index.row() < self.rowCount()):
-            return None
-        obj = self.object_records[index.row()]
-        if role == Qt.ItemDataRole.DisplayRole:
-            return obj
-        if role == Qt.ItemDataRole.UserRole:
-            # TODO
-            return "some data"
-        return None
-
-    def get_object(self, index):
-        if 0 <= index <= self.rowCount():
-            return self.object_records[index]
-        return None
-
-    def add_object_record(self, object_record):
-        insert_record(self.object_id, object_record)
-        self.refresh()
-
-    def modify_object(self, name, file_path, frame_path, in_frame, out_frame):
-        update_object_by_id(self.object_id, name, in_frame, out_frame)
-        self.object_view.load_view()
-
-    def refresh(self):
-        self.beginResetModel()
-        self.object_records = get_all_object_records_datetimes(self.object_id)
-        self.endResetModel()
