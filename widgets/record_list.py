@@ -17,10 +17,11 @@ from local_db.db import (
     get_all_records_for_list,
     insert_record,
     delete_record_by_id,
-    update_record_status,
 )
 from datetime import datetime
 from utils.cvpm import CentralVideoProcessingManager
+from utils.constants import Error
+from paths import Paths
 
 
 class RecordListItem(QWidget):
@@ -33,30 +34,20 @@ class RecordListItem(QWidget):
 
         vertical_layout1 = QVBoxLayout()
         self.record_date = QLabel(date.strftime("%Y-%m-%d %H:%M:%S"))
+        self.record_date.setObjectName("RecordListItem-record_date")
         self.file_path = QLabel(file_path)
+        self.file_path.setObjectName("RecordListItem-file_path")
         vertical_layout1.addWidget(self.record_date)
         vertical_layout1.addWidget(self.file_path)
 
         horizontal_layout1 = QHBoxLayout()
-        self.done_icon = QSvgWidget("./resources/icons/confirm.svg")
+        self.done_icon = QSvgWidget(Paths.CONFIRM_ICON)
         self.done_icon.setHidden(not is_processed)
         self.done_icon.setFixedSize(20, 20)
 
-        self.delete_button = QPushButton(icon=QIcon("./resources/icons/trash.svg"))
+        self.delete_button = QPushButton(icon=QIcon(Paths.TRASH_ICON))
         self.delete_button.setIconSize(QSize(20, 20))
         self.delete_button.clicked.connect(self.delete_button_clicked)
-        self.delete_button.setStyleSheet(
-            """
-            QPushButton {
-                border: none;
-                background: transparent;
-                padding: 0;
-            }
-            QPushButton:hover {
-                background: transparent;
-            }
-        """
-        )
 
         horizontal_layout1.addLayout(vertical_layout1)
         horizontal_layout1.addStretch(1)
@@ -87,6 +78,7 @@ class RecordListWidget(QListWidget):
 
     def __init__(self, object_id):
         super().__init__()
+        self.setObjectName("RecordListWidget")
         self.object_id = object_id
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -112,7 +104,7 @@ class RecordListWidget(QListWidget):
                     CentralVideoProcessingManager().add_task(self.object_id, record[0])
             new_list_item.delete_clicked.connect(self.remove_record)
             old_list_item = QListWidgetItem()
-            old_list_item.setSizeHint(QSize(200, 80))
+            old_list_item.setSizeHint(QSize(200, 110))
             self.addItem(old_list_item)
             self.setItemWidget(old_list_item, new_list_item)
         if len(records) > 0:
@@ -128,7 +120,7 @@ class RecordListWidget(QListWidget):
             CentralVideoProcessingManager().add_task(self.object_id, record_id)
             self.load_data()
         except Exception as e:
-            print(f"Unexpected error occured while adding a record: {e}")
+            print(f"{Error().ERROR_WHILE_ADDING_RECORD} {e}")
 
     def remove_record(self, record_id):
         try:
@@ -140,7 +132,7 @@ class RecordListWidget(QListWidget):
                     self.takeItem(i)
                     break
         except Exception as e:
-            print(f"Unexpected error occured while deleting a record: {e}")
+            print(f"{Error().ERROR_WHILE_DELETING_RECORD} {e}")
 
     def record_updated(self, object_id, record_id, progress):
         if object_id == self.object_id:

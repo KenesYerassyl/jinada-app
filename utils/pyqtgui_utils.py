@@ -1,9 +1,10 @@
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QGraphicsEllipseItem, QGraphicsLineItem
+from utils.constants import STANDARD_WIDTH
 
 
-def rescale_pixmap(pixmap: QPixmap, target_width=1280) -> QPixmap:
+def rescale_pixmap(pixmap: QPixmap, target_width=STANDARD_WIDTH) -> QPixmap:
     aspect_ratio = pixmap.height() / pixmap.width()
     target_height = int(target_width * aspect_ratio)
     return pixmap.scaled(

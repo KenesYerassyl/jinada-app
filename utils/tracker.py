@@ -1,9 +1,9 @@
-import utils.config as config
 from deep_sort.deep_sort.tracker import Tracker as DeepSortTracker
 from deep_sort.tools import generate_detections as gdet
 from deep_sort.deep_sort import nn_matching
 from deep_sort.deep_sort.detection import Detection
 import numpy as np
+from paths import Paths
 
 
 class Tracker:
@@ -12,10 +12,10 @@ class Tracker:
     tracks = None
 
     def __init__(self):
-        max_cosine_distance = config.cosine
-        max_age = config.max_age
+        max_cosine_distance = 0.7
+        max_age = 50
         nn_budget = None
-        encoder_model_filename = "./models/mars-small128.pb"
+        encoder_model_filename = Paths.ENCODER_MODEL_FILE
         metric = nn_matching.NearestNeighborDistanceMetric(
             "cosine", max_cosine_distance, nn_budget
         )

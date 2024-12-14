@@ -1,22 +1,22 @@
 from ultralytics import YOLO
-import utils.config as config
+from paths import Paths
 import torch
 
 
 class Model:
     def __init__(self):
-        self.model = YOLO(config.model_path)
-        self.class_name = config.class_name
-        self.confidence = config.confidence
+        self.model = YOLO(Paths.YOLO_MODEL_PATH)
+        self.class_name = 0
+        self.confidence = 0.5
         self.gpu_init()
 
     def gpu_init(self):
         if torch.cuda.is_available():
-            device = config.device_windows
+            device = "cuda"
         elif torch.backends.mps.is_available():
-            device = config.device_ios
+            device = "mps"
         else:
-            device = config.device_cpu
+            device = "cpu"
         self.model.to(device)
 
     def predict(self, frame):

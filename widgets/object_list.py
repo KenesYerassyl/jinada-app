@@ -19,6 +19,8 @@ from local_db.db import (
 )
 from datetime import datetime
 from utils.cvpm import CentralVideoProcessingManager
+from utils.constants import Error
+from paths import Paths
 
 
 class ObjectListItem(QWidget):
@@ -28,28 +30,20 @@ class ObjectListItem(QWidget):
     def __init__(self, object_id, name, date: datetime):
         super().__init__()
         info_layout = QVBoxLayout()
+
         self.object_name = QLabel(name)
+        self.object_name.setObjectName("ObjectListItem-object_name")
         self.object_id = object_id
         self.object_date = QLabel(date.strftime("%Y-%m-%d %H:%M:%S"))
+        self.object_date.setObjectName("ObjectListItem-object_date")
 
         info_layout.addWidget(self.object_name)
         info_layout.addWidget(self.object_date)
 
-        self.delete_button = QPushButton(icon=QIcon("./resources/icons/trash.svg"))
+        self.delete_button = QPushButton(icon=QIcon(Paths.TRASH_ICON))
+        self.delete_button.setObjectName("ObjectListItem-delete_button")
         self.delete_button.setIconSize(QSize(20, 20))
         self.delete_button.clicked.connect(self.delete_button_clicked)
-        self.delete_button.setStyleSheet(
-            """
-            QPushButton {
-                border: none;
-                background: transparent;
-                padding: 0;
-            }
-            QPushButton:hover {
-                background: transparent;
-            }
-        """
-        )
 
         layout = QHBoxLayout()
         layout.addLayout(info_layout)
@@ -68,6 +62,7 @@ class ObjectListWidget(QListWidget):
 
     def __init__(self):
         super().__init__()
+        self.setObjectName("ObjectListWidget")
         self.load_data()
 
     def load_data(self):
@@ -90,7 +85,7 @@ class ObjectListWidget(QListWidget):
             CentralVideoProcessingManager().add_task(object_id, record_id)
             self.load_data()
         except Exception as e:
-            print(f"Unexpected error occured while adding an object: {e}")
+            print(f"{Error().ERROR_WHILE_ADDING_OBJECT} {e}")
 
     def remove_object(self, object_id):
         try:
@@ -103,4 +98,4 @@ class ObjectListWidget(QListWidget):
                     break
             self.object_deleted.emit()
         except Exception as e:
-            print(f"Unexpected error occured while deleting an object: {e}")
+            print(f"{Error().ERROR_WHILE_DELETING_OBJECT} {e}")

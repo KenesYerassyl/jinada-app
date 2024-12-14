@@ -1,6 +1,9 @@
 from PyQt6.QtCore import QObject, QThreadPool, pyqtSignal
 from utils.video_processing_worker import VideoProcessingWorker
 from threading import Lock
+from utils.model import Model
+from utils.tracker import *
+from utils.constants import Error
 
 
 class Singleton(type(QObject), type):
@@ -19,6 +22,8 @@ class CentralVideoProcessingManager(QObject, metaclass=Singleton):
     finished = pyqtSignal(int, int)
     tasks = {}
     thread_pool = QThreadPool.globalInstance()
+    model = Model()
+    tracker = Tracker()
     _lock = Lock()
 
     def __init__(self):
@@ -27,7 +32,9 @@ class CentralVideoProcessingManager(QObject, metaclass=Singleton):
     def add_task(self, object_id, record_id):
         task = {"record_id": record_id, "progress": 0}
         try:
-            worker = VideoProcessingWorker(object_id, task["record_id"])
+            worker = VideoProcessingWorker(
+                object_id, task["record_id"], self.model, self.tracker
+            )
             worker.signals.progress_updated.connect(self.on_progress_updated)
             worker.signals.finished.connect(self.on_finished)
 
@@ -36,7 +43,7 @@ class CentralVideoProcessingManager(QObject, metaclass=Singleton):
             self.tasks[object_id].append(task)
             self.thread_pool.start(worker)
         except Exception as e:
-            print(f"Unexpected error occured while processing the video: {e}")
+            print(f"{Error.ERROR_WHILE_ADDING_TASK} {e}")
 
     def get_tasks(self, object_id):
         return self.tasks[object_id]

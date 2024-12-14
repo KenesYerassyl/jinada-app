@@ -2,9 +2,9 @@ from sqlalchemy import create_engine
 from local_db.object import Base, Object, ObjectRecord
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
-from local_db.db_fs import delete_frame
+from local_db.db_fs import delete_file
 from sqlalchemy.orm import joinedload
-
+from paths import Paths
 
 engine = create_engine("sqlite:///objects.db", echo=False)
 Session = sessionmaker(bind=engine)
@@ -110,8 +110,10 @@ def update_object_by_id(object_id, name, in_frame, out_frame):
 def delete_object_by_id(object_id):
     with get_session() as session:
         obj = session.query(Object).filter_by(id=object_id).first()
+        for record in obj.records:
+            delete_file(Paths.record_data_npz(record.id))
         if obj:
-            delete_frame(obj.frame_path)
+            delete_file(obj.frame_path)
             session.delete(obj)
 
 
@@ -124,6 +126,7 @@ def update_record_status(record_id):
 
 def delete_record_by_id(record_id):
     with get_session() as session:
-        obj = session.query(ObjectRecord).filter_by(id=record_id).first()
-        if obj:
-            session.delete(obj)
+        record = session.query(ObjectRecord).filter_by(id=record_id).first()
+        delete_file(Paths.record_data_npz(record.id))
+        if record:
+            session.delete(record)

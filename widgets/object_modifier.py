@@ -3,7 +3,6 @@ from PyQt6.QtWidgets import (
     QDialogButtonBox,
     QPushButton,
     QVBoxLayout,
-    QLabel,
     QWidget,
     QGraphicsScene,
     QHBoxLayout,
@@ -11,20 +10,14 @@ from PyQt6.QtWidgets import (
     QToolButton,
     QGraphicsItemGroup,
     QGraphicsEllipseItem,
-    QGraphicsItem,
     QLineEdit,
 )
-from PyQt6.QtGui import (
-    QPixmap,
-    QPen,
-    QBrush,
-    QIcon,
-    QKeyEvent,
-)
+from PyQt6.QtGui import QPixmap, QPen, QBrush, QIcon, QKeyEvent
 from PyQt6.QtCore import Qt, QEvent, QRectF, pyqtSignal
-from local_db.object import Object
 from widgets.zoompan_graphics_view import ZoomPanGraphicsView
 from utils.pyqtgui_utils import rescale_pixmap, copy_ellipse_item, copy_line_item
+from utils.constants import AppLabels
+from paths import Paths
 
 # TODO: Make sure that name is unique
 
@@ -49,24 +42,27 @@ class ObjectModifierDialog(QDialog):
         self.in_frame = in_frame if in_frame != None else []
         self.out_frame = out_frame if out_frame != None else []
         self.name = "" or name
-        self.setWindowTitle("Object modification")
+        self.setWindowTitle(AppLabels().OBJECT_MODIFIER_DIALOG_TITLE)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowCloseButtonHint)
         layout = QVBoxLayout(self)
 
         # input text
         self.name_label = QLineEdit()
-        self.name_label.setPlaceholderText("Name...")
+        self.name_label.setPlaceholderText(AppLabels().NAME_LABEL)
         self.name_label.textEdited.connect(self.name_updated)
         self.name_label.setText(self.name)
+        self.name_label.setObjectName("ObjectModifierDialog-name_label")
         # initial frame graphics scene
         self.polygon_drawer = PolygonDrawer(self.frame_path)
         # buttons
-        self.upload_button = QPushButton("Upload")
+        self.upload_button = QPushButton(AppLabels().UPLOAD_BUTTON)
         self.upload_button.clicked.connect(self.on_upload)
+        self.upload_button.setObjectName("dialog-button-positive")
         self.polygon_drawer.polygons_drawn.connect(self.check_validity)
 
-        self.back_button = QPushButton("Back")
+        self.back_button = QPushButton(AppLabels().BACK_BUTTON)
         self.back_button.clicked.connect(self.on_back)
+        self.back_button.setObjectName("dialog-button-neutral")
 
         self.button_box = QDialogButtonBox(self)
         self.button_box.addButton(
@@ -129,25 +125,30 @@ class PolygonDrawer(QWidget):
         self.view = ZoomPanGraphicsView(self.scene)
 
         self.pan_mode_button = QToolButton()
-        self.pan_mode_button.setIcon(QIcon("./resources/icons/move.svg"))
+        self.pan_mode_button.setIcon(QIcon(Paths.MOVE_ICON))
         self.pan_mode_button.setCheckable(True)
         self.pan_mode_button.toggled.connect(self.activate_pan_mode)
+        self.pan_mode_button.setObjectName("toolbox_button")
 
         self.confirm_polygon_button = QToolButton()
-        self.confirm_polygon_button.setIcon(QIcon("./resources/icons/confirm.svg"))
+        self.confirm_polygon_button.setIcon(QIcon(Paths.CONFIRM_ICON))
         self.confirm_polygon_button.setVisible(False)
         self.confirm_polygon_button.clicked.connect(self.confirm_polygon)
+        self.confirm_polygon_button.setObjectName("toolbox_button")
 
         self.reject_polygon_button = QToolButton()
-        self.reject_polygon_button.setIcon(QIcon("./resources/icons/reject.svg"))
+        self.reject_polygon_button.setIcon(QIcon(Paths.REJECT_ICON))
         self.reject_polygon_button.setVisible(False)
         self.reject_polygon_button.clicked.connect(self.activate_normal_mode)
+        self.reject_polygon_button.setObjectName("toolbox_button")
 
-        self.in_frame_button = QPushButton("Add in-frame")
+        self.in_frame_button = QPushButton(AppLabels().IN_FRAME_BUTTON)
         self.in_frame_button.clicked.connect(self.inframe_button_clicked)
+        self.in_frame_button.setObjectName("active_button")
 
-        self.out_frame_button = QPushButton("Add out-frame")
+        self.out_frame_button = QPushButton(AppLabels().OUT_FRAME_BUTTON)
         self.out_frame_button.clicked.connect(self.outframe_button_clicked)
+        self.out_frame_button.setObjectName("active_button")
 
         self.buttons_layout = QHBoxLayout()
         self.buttons_layout.addWidget(self.pan_mode_button)

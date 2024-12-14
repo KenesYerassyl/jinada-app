@@ -3,6 +3,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from widgets.object_uploader import ObjectUploaderDialog
 from widgets.object_modifier import ObjectModifierDialog
 from widgets.object_list import ObjectListWidget, ObjectListItem, QListWidgetItem
+from utils.constants import AppLabels
 
 
 class ObjectsContainer(QWidget):
@@ -10,10 +11,12 @@ class ObjectsContainer(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setObjectName("ObjectsContainer")
 
         self.add_button = QPushButton()
-        self.add_button.setText("Add object")
+        self.add_button.setText(AppLabels().ADD_BUTTON)
         self.add_button.clicked.connect(self.invoke_object_uploader_dialog)
+        self.add_button.setObjectName("active_button")
 
         self.list = ObjectListWidget()
         self.list.itemClicked.connect(self.load_object)

@@ -16,7 +16,9 @@ from utils.pyqtgui_utils import rescale_pixmap
 from widgets.file_upload import FileUploadWidget
 from widgets.object_modifier import ObjectModifierDialog
 from widgets.date_picker import DatePickerDialog
+from widgets.data_presenter import DataPresenterWidget
 from widgets.record_list import RecordListWidget
+from utils.constants import AppLabels
 
 
 class ObjectView(QWidget):
@@ -28,25 +30,28 @@ class ObjectView(QWidget):
         object_layout = QVBoxLayout()
         object_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        self.object_name = QLabel("Object Frame")
+        self.object_name = QLabel(AppLabels().OBJECT_NAME)
+        self.object_name.setObjectName("ObjectView-object_name")
 
-        self.object_frame = QLabel("Select an object.")
+        self.object_frame = QLabel(AppLabels().OBJECT_FRAME)
+        self.object_frame.setObjectName("ObjectView-object_frame")
         self.object_frame.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.modify_frames_button = QPushButton("Modify Frames")
+        self.modify_frames_button = QPushButton(AppLabels().MODIFY_FRAMES_BUTTON)
         self.modify_frames_button.clicked.connect(self.modify_frames_button_clicked)
-        self.export_data_button = QPushButton("Export Data")
-        self.export_data_button.clicked.connect(self.export_data_button_clicked)
+        self.modify_frames_button.setObjectName("active_button")
+        self.date_picker_button = QPushButton(AppLabels().DATE_PICKER_BUTTON)
+        self.date_picker_button.clicked.connect(self.date_picker_button_clicked)
+        self.date_picker_button.setObjectName("active_button")
         tools_layout = QHBoxLayout()
         tools_layout.addWidget(self.modify_frames_button)
-        tools_layout.addWidget(self.export_data_button)
+        tools_layout.addWidget(self.date_picker_button)
 
         self.records_list = RecordListWidget(-1)
 
         self.file_upload = FileUploadWidget()
         self.file_upload.uploaded.connect(self.records_list.add_record)
 
-        object_layout.addWidget(self.object_name)
         object_layout.addWidget(self.object_frame)
         object_layout.addLayout(tools_layout)
         object_layout.addWidget(self.file_upload)
@@ -61,20 +66,22 @@ class ObjectView(QWidget):
         self.scroll_area.setVerticalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOn
         )
-        self.scroll_area.setVerticalScrollBarPolicy(
+        self.scroll_area.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
+        self.scroll_area.setObjectName("ObjectView-scroll_area")
         layout = QVBoxLayout()
+        layout.addWidget(self.object_name)
         layout.addWidget(self.scroll_area)
 
         self.setLayout(layout)
         self.reset()
 
     def reset(self):
-        self.object_name.setText("Object Frame")
-        self.object_frame.setText("Select an object.")
+        self.object_name.setText(AppLabels().OBJECT_NAME)
+        self.object_frame.setText(AppLabels().OBJECT_FRAME)
         self.modify_frames_button.setDisabled(True)
-        self.export_data_button.setDisabled(True)
+        self.date_picker_button.setDisabled(True)
         self.file_upload.setHidden(True)
         self.records_list.object_id = -1
         self.records_list.load_data()
@@ -109,15 +116,8 @@ class ObjectView(QWidget):
         self.object_frame.resize(pixmap.width(), pixmap.height())
 
         self.modify_frames_button.setDisabled(False)
-        self.export_data_button.setDisabled(False)
+        self.date_picker_button.setDisabled(False)
         self.file_upload.setHidden(False)
-
-    # def resizeEvent(self, event):
-    #     if self.records_list.object_id != -1:
-    #         self.object_frame.setPixmap(
-    #             rescale_pixmap(self.object_frame.pixmap(), self.object_frame.width())
-    #         )
-    #     return super().resizeEvent(event)
 
     def modify_frames_button_clicked(self):
         object = get_object_by_id(self.records_list.object_id)
@@ -136,7 +136,13 @@ class ObjectView(QWidget):
         update_object_by_id(self.records_list.object_id, name, in_frame, out_frame)
         self.load_object(self.records_list.object_id)
 
-    def export_data_button_clicked(self):
-        data_exporter_dialog = DatePickerDialog(self)
-        # TODO connect to data_exporter_dialog.date_picked
-        data_exporter_dialog.open()
+    def date_picker_button_clicked(self):
+        data_picker_dialog = DatePickerDialog(self)
+        data_picker_dialog.date_picked.connect(self.show_data)
+        data_picker_dialog.open()
+
+    def show_data(self, start_date, end_date):
+        self.date_presenter = DataPresenterWidget(
+            self.records_list.object_id, start_date, end_date
+        )
+        self.date_presenter.show()

@@ -1,11 +1,12 @@
 import cv2
 import numpy as np
 from typing import List, Tuple
-from utils.model import Model
-from utils.tracker import *
 import cvzone
 from PyQt6.QtCore import QRunnable, pyqtSignal, pyqtSlot, QObject
 from local_db.db import get_record_by_id, get_object_by_id, update_record_status
+from utils.constants import STANDARD_WIDTH, Error
+from paths import Paths
+import numpy as np
 
 
 class VideoProcessorSignals(QObject):
@@ -13,17 +14,20 @@ class VideoProcessorSignals(QObject):
     finished = pyqtSignal(int, int)
 
 
+# TODO Init model and tracker before hand
+
+
 class VideoProcessingWorker(QRunnable):
 
-    def __init__(self, object_id, record_id, visual=False):
+    def __init__(self, object_id, record_id, model, tracker, visual=False):
         super().__init__()
         self.signals = VideoProcessorSignals()
         self.object_id = object_id
         self.record_id = record_id
         self.visual = visual
-        self.model = Model()
+        self.model = model
         self.model.gpu_init()
-        self.tracker = Tracker()
+        self.tracker = tracker
         self.count = 0
 
         object = get_object_by_id(object_id)
@@ -41,25 +45,53 @@ class VideoProcessingWorker(QRunnable):
             self.n_outside_polygons = len(out_polygon)
             self.visitors = [0 for _ in range(self.n_inside_polygons)]
             self.entry_times = [{} for _ in range(self.n_inside_polygons)]
-            self.time_spent = [set() for _ in range(self.n_inside_polygons)]
+            self.time_spent = [[] for _ in range(self.n_inside_polygons)]
             self.inside = [set() for _ in range(self.n_inside_polygons)]
             self.inside_polygons = np.int32(in_polygon)
             self.outside_polygons = np.int32(out_polygon)
         except Exception as e:
-            print(
-                f"An unexpected error occurred: {e}\nPolygons shape (n_polygons, n_coordinates:4, xy:2)"
-            )
+            print(f"{Error().ERROR_WHILE_SETTING_POLYGONS} {e}")
 
     def set_video(self, video_path):
         try:
             cap = cv2.VideoCapture(video_path)
             if not cap.isOpened():
-                raise ValueError("No video")
-            self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                raise ValueError(Error().ERROR_NO_VIDEO)
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            self.fps = cap.get(cv2.CAP_PROP_FPS)
             self.video = cap
+
+            if self.visual:
+                fourcc = cv2.VideoWriter_fourcc(*"XVID")
+                self.out = cv2.VideoWriter(
+                    "output.avi", fourcc, self.fps, (width, height)
+                )
+
+            modified_width = STANDARD_WIDTH
+            aspect_ratio = height / width
+            modified_height = int(modified_width * aspect_ratio)
+            height_aspect = height / modified_height
+            width_aspect = width / modified_width
+            for polygon_i in range(len(self.inside_polygons)):
+                for point_i in range(len(self.inside_polygons[polygon_i])):
+                    self.inside_polygons[polygon_i][point_i][0] = int(
+                        self.inside_polygons[polygon_i][point_i][0] * width_aspect
+                    )
+                    self.inside_polygons[polygon_i][point_i][1] = int(
+                        self.inside_polygons[polygon_i][point_i][1] * height_aspect
+                    )
+
+            for polygon_i in range(len(self.outside_polygons)):
+                for point_i in range(len(self.outside_polygons[polygon_i])):
+                    self.outside_polygons[polygon_i][point_i][0] = int(
+                        self.outside_polygons[polygon_i][point_i][0] * width_aspect
+                    )
+                    self.outside_polygons[polygon_i][point_i][1] = int(
+                        self.outside_polygons[polygon_i][point_i][1] * height_aspect
+                    )
         except Exception as e:
-            print(f"Wrong video path and error: {e}")
+            print(f"{Error().ERROR_WHILE_SETTING_VIDEO} {e}")
 
     def visualize_frame(self, frame):
         cvzone.putTextRect(frame, f"VISITED: {self.visitors}", (50, 60), 2, 2)
@@ -69,7 +101,7 @@ class VideoProcessingWorker(QRunnable):
             cv2.polylines(frame, [polygon], True, (0, 255, 0), 2)
         for polygon in self.outside_polygons:
             cv2.polylines(frame, [polygon], True, (0, 0, 255), 2)
-        cv2.imshow("RGB", frame)
+        self.out.write(frame)
 
     def draw_bboxes(self, frame, x3, y3, x4, y4, id):
         cv2.rectangle(frame, (x3, y3), (x4, y4), (255, 255, 255), 2)
@@ -91,16 +123,18 @@ class VideoProcessingWorker(QRunnable):
                 self.outside_polygons[i], (x3, y4), False
             )
             if outside_check >= 0 and (id in self.inside[i]):
-                self.time_spent[i].add((self.count - self.entry_times[i][id]) / 25)
+                self.time_spent[i].append(
+                    (self.count - self.entry_times[i][id]) / self.fps
+                )
                 self.inside[i].discard(id)
                 self.entry_times[i].pop(id)
 
     @pyqtSlot()
     def run(self):
         if self.video is None:
-            raise Exception("No video")
+            raise Exception(Error().ERROR_NO_VIDEO)
         if self.inside_polygons is None or self.outside_polygons is None:
-            raise Exception("No polygons")
+            raise Exception(Error().ERROR_NO_POLYGONS)
         try:
             while True:
                 ret, frame = self.video.read()
@@ -131,20 +165,29 @@ class VideoProcessingWorker(QRunnable):
                     self.detect_collisions(x3, y4, id)
                 if self.visual:
                     self.visualize_frame(frame)
+
                 self.signals.progress_updated.emit(
                     self.object_id,
                     self.record_id,
                     int(self.count / self.video.get(cv2.CAP_PROP_FRAME_COUNT) * 100),
                 )
+
                 if cv2.waitKey(1) & 0xFF == 27:
                     break
-
-            # Random occurences of new ids substracted from the total number of visitors
             for i in range(len(self.visitors)):
-                self.visitors[i] - len(self.inside[i])
+                self.visitors[i] -= len(self.inside[i])
             self.video.release()
+            if self.visual:
+                self.out.release()
             cv2.destroyAllWindows()
+            self.visitors = np.array(self.visitors, dtype=object)
+            self.time_spent = np.array(self.time_spent, dtype=object)
+            np.savez(
+                Paths.record_data(self.record_id),
+                visitors=self.visitors,
+                time_spent=self.time_spent,
+            )
             update_record_status(self.record_id)
             self.signals.finished.emit(self.object_id, self.record_id)
         except Exception as e:
-            print(f"Something with process: {e}")
+            print(f"{Error().ERROR_WHILE_PROCESSING_VIDEO} {self.record_id}. {e}")

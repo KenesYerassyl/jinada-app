@@ -1,0 +1,356 @@
+* {
+    font-family: "gill sans";
+}
+
+QLabel {
+    color: white;
+}
+
+QPushButton {
+    color: white;
+}
+
+QWidget {
+    background-color: transparent;
+}
+
+QMainWindow {
+    background: @deep_level;
+}
+
+QScrollBar:vertical {
+    width: 10px;
+    margin: 20px 0px 20px 0px;
+}
+
+QScrollBar::handle:vertical{
+    min-height: 10px;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::add-line:horizontal {
+    background: none;
+    height: 45px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical, QScrollBar::sub-line:horizontal {
+    background: none;
+    height: 45px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+QMainWindow::separator {
+    background: @regular; 
+    width: 1px; 
+}
+
+QDialog {
+    background: @regular
+}
+
+QCalendarWidget {
+    border: 2px solid #5a5a5a; 
+    border-radius: 15px;
+    background-color: qlineargradient(
+        x1:0, y1:1, x2:1, y2:0, 
+        stop:0.2 @grad_window1, 
+        stop:0.8 @grad_window2, 
+        stop:1 @grad_window3
+    );
+    color: white; 
+    font-size: 14px;
+}
+
+
+
+/* Navigation Bar Buttons (Month/Year Navigation) */
+QCalendarWidget QToolButton {
+    background: #3b3b45;
+    color: white;
+    border: 1px solid #5a5a5a;
+    border-radius: 10px;
+    padding: 5px 10px;         /* Padding inside the buttons */
+    margin: 5px;
+}
+
+QCalendarWidget QToolButton:hover {
+    background-color: #5a5a6a; /* Button hover effect */
+}
+
+/* Navigation Bar Arrows */
+QCalendarWidget QToolButton::menu-indicator {
+    image: none; 
+}
+
+QCalendarWidget QWidget#qt_calendar_prevmonth {
+    qproperty-icon: url('./resources/icons/arrow_left.svg');
+}
+
+QCalendarWidget QWidget#qt_calendar_nextmonth {
+    qproperty-icon: url('./resources/icons/arrow_right.svg');
+}
+
+/* Days of the Week Header (e.g., Mon, Tue) */
+QCalendarWidget QHeaderView::section {
+    background: #3b3b45; 
+    color: white;        /* Text color */
+    border: 1px solid #5a5a5a;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 3px;
+}
+
+QCalendarWidget QTableView {
+    border: none;
+}
+
+QCalendarWidget QTableView:item {
+    border-radius: 10px;
+    background: transparent;
+    color: white;
+    padding: 1px;
+}
+
+QCalendarWidget QTableView:item:selected {
+    background: @tint_color; 
+    color: white;
+}
+
+QCalendarWidget QTableView:item:hover:!selected {
+    background-color: #3b3b45;
+    color: white;
+}
+
+QCalendarWidget QWidget#qt_calendar_navigationbar {
+    background-color: transparent;
+}
+
+QCalendarWidget QMenu { 
+    border-radius: 10px;
+    background-color: #3b3b45;
+}
+
+QCalendarWidget QMenu::item:selected {
+    color: white;
+    background-color: #5A5F64;
+}
+
+QProgressBar {
+    border: 2px solid #5A5A5A;     /* Border around the progress bar */
+    border-radius: 5px;           /* Rounded corners */
+    background-color: #E0E0E0;    /* Background color of the bar */
+    text-align: center;           /* Center-align the percentage text */
+    color: black;                 /* Text color */
+    height: 5px;                 /* Height of the bar */
+}
+
+QProgressBar::chunk {
+    border-radius: 2px;
+    background: @grad_window2;
+}
+
+#DatePickerDialog-label {
+    background: #3b3b45;
+    border: 1px solid #5a5a5a;
+    border-radius: 8px;
+    height: 30x;
+    padding: 5px;
+}
+
+#FileUploadWidget {
+    background-color: white;
+    margin: 5px;
+    padding: 20px;
+}
+
+#FileUploadWidget-icon_label {
+    background: transparent;
+    color: black;
+}
+
+#FileUploadWidget-label {
+    background: transparent;
+    color: white;
+}
+
+#FileUploadWidget-file_upload_area {
+    background: black;
+    border: 2px dashed @tint_color;
+    border-radius: 5px;
+    margin: 5px;
+    padding: 20px;
+}
+
+#ObjectListWidget {
+    background: qlineargradient(
+        x1:0, y1:1, x2:1, y2:0, 
+        stop:0.2 @grad_window1, 
+        stop:0.8 @grad_window2, 
+        stop:1 @grad_window3
+    );
+    border-radius: 20px;
+}
+
+#ObjectListWidget::item {
+    background-color: @regular;
+    border-radius: 15px;
+    padding: 2px;
+    font: bold;
+    height: 40px;
+}
+
+#ObjectListWidget::item:hover {
+    border: 1px solid white;
+}
+
+#ObjectListWidget::item:selected {
+    background-color: @tint_color;
+}
+
+#ObjectListWidget::item:selected QLabel {
+    color: white;
+}
+
+#ObjectListItem-delete_button {
+    background: transparent;
+    padding: 0;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#ObjectListItem-delete_button:hover {
+    background-color: #fa7272;
+}
+
+#ObjectListItem-delete_button:selected {
+    background-color: @tint_color;
+}
+
+
+#ObjectView-object_frame {
+    border-radius: 10px;
+    padding: 5px;
+    background-color: @regular;
+}
+
+#ObjectView-object_frame {
+    border-radius: 10px;      /* Set the same border radius to the image inside the label */
+    width: 100%;              /* Ensure the image fills the label */
+    height: 100%;
+}
+
+#ObjectListItem-object_name {
+    background: transparent;
+    font: 16px;
+}
+
+#ObjectListItem-object_date {
+    background: transparent;
+    font: 12px;
+}
+
+#active_button {
+    background-color: @tint_color;
+    border-radius: 4px;
+    height: 25px;
+    color: #ffffff;
+    font: 15px;
+}
+
+#active_button:pressed {
+    background-color: #403185;
+}
+
+#active_button:disabled {
+    background-color: #403185;
+    color: #8e8e8e;
+}
+
+
+#RecordListItem-record_date {
+    background: transparent;
+    font: 16px;
+}
+
+#RecordListItem-file_path {
+    background: transparent;
+    font: 12px;
+}
+
+#RecordListWidget::item {
+    border-radius: 20px;
+    background-color: @deep_level;
+    margin: 5px;
+}
+
+#RecordListWidget::item:hover {
+    border: 1px solid white;
+}
+
+#RecordListWidget::item:selected {
+    background-color: @tint_color;
+    color: white;
+}
+
+#RecordListWidget::item:selected QLabel {
+    color: white;
+}
+
+#ObjectView-object_name {
+    font: bold 20px;
+}
+
+#ObjectView-scroll_area {
+    border-radius: 20px;
+    background: @regular;
+}
+
+#dialog-button-positive {
+    background-color: @tint_color;
+    border-radius: 5px;
+    padding: 5px 9px 5px 9px;
+}
+#dialog-button-positive:pressed {
+    background-color: #403185;
+}
+
+#dialog-button-neutral {
+    background-color: black;
+    border-radius: 5px;
+    padding: 5px 9px 5px 9px;
+}
+
+#dialog-button-neutral:pressed {
+    background-color: #ababab;
+}
+
+
+#dialog-button-negative {
+    background-color: #fa7272;
+    border-radius: 5px;
+    padding: 5px 9px 5px 9px;
+}
+
+#dialog-button-negative:pressed {
+    background-color: #873e3e;
+}
+
+#toolbox_button:checked, toolbox_button:pressed {
+    background-color: @deep_level
+}
+
+#toolbox_button:hover {
+    border: 1px solid white;
+}
+
+#ObjectModifierDialog-name_label {
+    color: white;
+    font: bold 16px;
+    background-color: @deep_level;
+    background: @deep_level;
+    border-radius: 10px;
+    padding: 4px;
+}
+

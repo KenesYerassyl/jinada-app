@@ -12,14 +12,14 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setMinimumSize(QSize(1280, 720))
-        self.setWindowTitle(constants.app_name)
+        self.setWindowTitle(constants.APP_NAME)
 
         self.central_widget = ObjectView()
         self.setCentralWidget(self.central_widget)
 
-        self.dock_widget = QDockWidget("Object List", self)
+        self.dock_widget = QDockWidget(self)
         self.dock_widget.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
-        self.dock_widget.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable)
+        self.dock_widget.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dock_widget)
 
         self.objects_container = ObjectsContainer()
