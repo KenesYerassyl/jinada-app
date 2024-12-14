@@ -1,5 +1,5 @@
 __pycache__
-violette-env
+jinada-venv
 models
 samples
 outputs
@@ -7,3 +7,5 @@ outputs
 .vscode
 objects.db
 ./local_db/object_frames
+./local_db/record_data
+main.spec
