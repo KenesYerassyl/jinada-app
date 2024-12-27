@@ -18,6 +18,8 @@ class Paths:
     REJECT_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "reject.svg")
     TRASH_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "trash.svg")
     FILE_PLUS_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "file-plus.svg")
+    PLUS_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "plus.svg")
+    PLUS_CLICKED_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "plus_clicked.svg")
     ENCODER_MODEL_FILE = os.path.join(BASEDIR, MODELS, "mars-small128.pb")
     YOLO_MODEL_PATH = os.path.join(BASEDIR, MODELS, "yolov10b.pt")
     OBJECT_FRAMES = os.path.join(BASEDIR, LOCAL_DB, "object_frame")
@@ -29,3 +31,4 @@ class Paths:
 
     def record_data(record_id):
         return os.path.join(BASEDIR, LOCAL_DB, RECORD_DATA, f"{record_id}")
+

@@ -1,6 +1,4 @@
-@tint_color=#785cf7
-@deep_level=#070707
-@regular=#1b1c1f
-@grad_window1=#0a0a0c
-@grad_window2=#a474a4
-@grad_window3=#8e82c3
+@tint_color=#808080
+@deep_level=#e5e5e5
+@regular=#e5e5e5
+@pressed_button=#636363

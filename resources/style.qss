@@ -1,13 +1,13 @@
 * {
-    font-family: "gill sans";
+    font-family: "";
 }
 
 QLabel {
-    color: white;
+    color: black;
 }
 
 QPushButton {
-    color: white;
+    color: black;
 }
 
 QWidget {
@@ -47,29 +47,20 @@ QMainWindow::separator {
 }
 
 QDialog {
-    background: @regular
+    background: @deep_level
 }
 
 QCalendarWidget {
     border: 2px solid #5a5a5a; 
     border-radius: 15px;
-    background-color: qlineargradient(
-        x1:0, y1:1, x2:1, y2:0, 
-        stop:0.2 @grad_window1, 
-        stop:0.8 @grad_window2, 
-        stop:1 @grad_window3
-    );
-    color: white; 
+    color: black; 
     font-size: 14px;
 }
 
-
-
 /* Navigation Bar Buttons (Month/Year Navigation) */
 QCalendarWidget QToolButton {
-    background: #3b3b45;
-    color: white;
-    border: 1px solid #5a5a5a;
+    background: @tint_color;
+    color: black;
     border-radius: 10px;
     padding: 5px 10px;         /* Padding inside the buttons */
     margin: 5px;
@@ -95,7 +86,7 @@ QCalendarWidget QWidget#qt_calendar_nextmonth {
 /* Days of the Week Header (e.g., Mon, Tue) */
 QCalendarWidget QHeaderView::section {
     background: #3b3b45; 
-    color: white;        /* Text color */
+    color: black;        /* Text color */
     border: 1px solid #5a5a5a;
     border-radius: 5px;
     font-size: 12px;
@@ -109,7 +100,7 @@ QCalendarWidget QTableView {
 QCalendarWidget QTableView:item {
     border-radius: 10px;
     background: transparent;
-    color: white;
+    color: black;
     padding: 1px;
 }
 
@@ -120,7 +111,7 @@ QCalendarWidget QTableView:item:selected {
 
 QCalendarWidget QTableView:item:hover:!selected {
     background-color: #3b3b45;
-    color: white;
+    color: black;
 }
 
 QCalendarWidget QWidget#qt_calendar_navigationbar {
@@ -129,11 +120,11 @@ QCalendarWidget QWidget#qt_calendar_navigationbar {
 
 QCalendarWidget QMenu { 
     border-radius: 10px;
-    background-color: #3b3b45;
+    background-color: @tint_color;
 }
 
 QCalendarWidget QMenu::item:selected {
-    color: white;
+    color: black;
     background-color: #5A5F64;
 }
 
@@ -148,11 +139,11 @@ QProgressBar {
 
 QProgressBar::chunk {
     border-radius: 2px;
-    background: @grad_window2;
+    background: @tint_color;
 }
 
 #DatePickerDialog-label {
-    background: #3b3b45;
+    background: white;
     border: 1px solid #5a5a5a;
     border-radius: 8px;
     height: 30x;
@@ -160,7 +151,7 @@ QProgressBar::chunk {
 }
 
 #FileUploadWidget {
-    background-color: white;
+    background-color: black;
     margin: 5px;
     padding: 20px;
 }
@@ -172,29 +163,42 @@ QProgressBar::chunk {
 
 #FileUploadWidget-label {
     background: transparent;
-    color: white;
+    color: black;
 }
 
 #FileUploadWidget-file_upload_area {
-    background: black;
+    background: @regular;
     border: 2px dashed @tint_color;
     border-radius: 5px;
     margin: 5px;
     padding: 20px;
 }
 
+#ObjectsContainer {
+    background: white;
+    margin: 10px;
+    border-radius: 15px;
+
+}
+
+#ObjectsContainer-label {
+    font: bold 15px;
+    margin-left: 15px;
+    margin-top: 10px;
+}
+
+#ObjectsContainer-add_button {
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+
 #ObjectListWidget {
-    background: qlineargradient(
-        x1:0, y1:1, x2:1, y2:0, 
-        stop:0.2 @grad_window1, 
-        stop:0.8 @grad_window2, 
-        stop:1 @grad_window3
-    );
-    border-radius: 20px;
+    background: transparent;
 }
 
 #ObjectListWidget::item {
-    background-color: @regular;
+    background-color: @deep_level;
     border-radius: 15px;
     padding: 2px;
     font: bold;
@@ -202,7 +206,7 @@ QProgressBar::chunk {
 }
 
 #ObjectListWidget::item:hover {
-    border: 1px solid white;
+    border: 1px solid black;
 }
 
 #ObjectListWidget::item:selected {
@@ -210,7 +214,7 @@ QProgressBar::chunk {
 }
 
 #ObjectListWidget::item:selected QLabel {
-    color: white;
+    color: black;
 }
 
 #ObjectListItem-delete_button {
@@ -228,19 +232,6 @@ QProgressBar::chunk {
     background-color: @tint_color;
 }
 
-
-#ObjectView-object_frame {
-    border-radius: 10px;
-    padding: 5px;
-    background-color: @regular;
-}
-
-#ObjectView-object_frame {
-    border-radius: 10px;      /* Set the same border radius to the image inside the label */
-    width: 100%;              /* Ensure the image fills the label */
-    height: 100%;
-}
-
 #ObjectListItem-object_name {
     background: transparent;
     font: 16px;
@@ -253,18 +244,36 @@ QProgressBar::chunk {
 
 #active_button {
     background-color: @tint_color;
-    border-radius: 4px;
+    border-radius: 9px;
     height: 25px;
     color: #ffffff;
     font: 15px;
 }
 
+#ObjectView-object_frame {
+    border-radius: 10px;
+    padding: 5px;
+    background-color: @deep_level;
+}
+
+#ObjectView {
+    background: white;
+    margin: 10px;
+    border-radius: 15px;
+    border: 5px solid white;
+}
+
+#ObjectView-object_name {
+    font: bold 20px;
+    padding: 10px;
+}
+
 #active_button:pressed {
-    background-color: #403185;
+    background-color: @pressed_button;
 }
 
 #active_button:disabled {
-    background-color: #403185;
+    background-color: @pressed_button;
     color: #8e8e8e;
 }
 
@@ -281,30 +290,21 @@ QProgressBar::chunk {
 
 #RecordListWidget::item {
     border-radius: 20px;
-    background-color: @deep_level;
+    background-color: @regular;
     margin: 5px;
 }
 
 #RecordListWidget::item:hover {
-    border: 1px solid white;
+    border: 1px solid black;
 }
 
 #RecordListWidget::item:selected {
     background-color: @tint_color;
-    color: white;
+    color: black;
 }
 
 #RecordListWidget::item:selected QLabel {
-    color: white;
-}
-
-#ObjectView-object_name {
-    font: bold 20px;
-}
-
-#ObjectView-scroll_area {
-    border-radius: 20px;
-    background: @regular;
+    color: black;
 }
 
 #dialog-button-positive {
@@ -313,11 +313,11 @@ QProgressBar::chunk {
     padding: 5px 9px 5px 9px;
 }
 #dialog-button-positive:pressed {
-    background-color: #403185;
+    background-color: @pressed_button;
 }
 
 #dialog-button-neutral {
-    background-color: black;
+    background-color: white;
     border-radius: 5px;
     padding: 5px 9px 5px 9px;
 }
@@ -342,14 +342,13 @@ QProgressBar::chunk {
 }
 
 #toolbox_button:hover {
-    border: 1px solid white;
+    border: 1px solid black;
 }
 
 #ObjectModifierDialog-name_label {
-    color: white;
+    color: black;
     font: bold 16px;
-    background-color: @deep_level;
-    background: @deep_level;
+    background: white;
     border-radius: 10px;
     padding: 4px;
 }

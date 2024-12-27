@@ -1,6 +1,6 @@
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QColor
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QGraphicsEllipseItem, QGraphicsLineItem
+from PyQt6.QtWidgets import QGraphicsEllipseItem, QGraphicsLineItem, QGraphicsDropShadowEffect, QWidget
 from utils.constants import STANDARD_WIDTH
 
 

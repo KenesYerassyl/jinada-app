@@ -1,33 +1,54 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayout
+from PyQt6.QtCore import Qt, pyqtSignal, QSize
+from PyQt6.QtGui import QIcon
 from widgets.object_uploader import ObjectUploaderDialog
 from widgets.object_modifier import ObjectModifierDialog
 from widgets.object_list import ObjectListWidget, ObjectListItem, QListWidgetItem
 from utils.constants import AppLabels
+from paths import Paths
+from widgets.shadowed_widget import ShadowedWidget
 
 
-class ObjectsContainer(QWidget):
+class ObjectsContainer(ShadowedWidget):
     item_clicked = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
         self.setObjectName("ObjectsContainer")
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
-        self.add_button = QPushButton()
-        self.add_button.setText(AppLabels().ADD_BUTTON)
+        self.label = QLabel(AppLabels().OBJECT_LIST)
+        self.label.setObjectName("ObjectsContainer-label")
+
+        self.add_button = QPushButton(icon=QIcon(Paths.PLUS_ICON))
+        self.add_button.setIconSize(QSize(25, 25))
         self.add_button.clicked.connect(self.invoke_object_uploader_dialog)
-        self.add_button.setObjectName("active_button")
+        self.add_button.pressed.connect(self.set_pressed_icon)
+        self.add_button.released.connect(self.set_released_icon)
+        self.add_button.setObjectName("ObjectsContainer-add_button")
+
+        header_layout = QHBoxLayout()
+        header_layout.addWidget(self.label)
+        header_layout.addStretch(1)
+        header_layout.addWidget(self.add_button)
+        header_layout.setAlignment(self.add_button, Qt.AlignmentFlag.AlignCenter)
 
         self.list = ObjectListWidget()
         self.list.itemClicked.connect(self.load_object)
         self.list.setSpacing(10)
 
-        object_layout = QVBoxLayout()
-        object_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        object_layout.addWidget(self.add_button)
-        object_layout.addWidget(self.list)
+        container_layout = QVBoxLayout()
+        container_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        container_layout.addLayout(header_layout)
+        container_layout.addWidget(self.list)
 
-        self.setLayout(object_layout)
+        self.setLayout(container_layout)
+
+    def set_pressed_icon(self):
+        self.add_button.setIcon(QIcon(Paths.PLUS_CLICKED_ICON))
+    
+    def set_released_icon(self):
+        self.add_button.setIcon(QIcon(Paths.PLUS_ICON))
 
     def invoke_object_uploader_dialog(self):
         object_uploader_dialog = ObjectUploaderDialog(parent=self)

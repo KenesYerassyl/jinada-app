@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QFileSystemWatcher, QTranslator, QLocale
+from PyQt6.QtCore import QFileSystemWatcher, QTranslator, QCoreApplication
 from main_window import MainWindow
-from PyQt6.QtCore import QCoreApplication
+from PyQt6.QtGui import QFontDatabase
 import sys
 import os
 from paths import Paths

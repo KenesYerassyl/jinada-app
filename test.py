@@ -40,9 +40,4 @@ def generate_records():
         generate_data(id)
         days += timedelta(1)
 
-a = np.array([[1, 2, 3], [1], [1, 2]], dtype=object)
-b = np.array([[3],[2, 4],[3, 5, 5]], dtype=object)
-
-for i in range(len(b)):
-    b[i] = list(b[i]) + list(a[i])
-print(b, len(b))
+generate_records()

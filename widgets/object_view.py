@@ -19,13 +19,16 @@ from widgets.date_picker import DatePickerDialog
 from widgets.data_presenter import DataPresenterWidget
 from widgets.record_list import RecordListWidget
 from utils.constants import AppLabels
+from widgets.shadowed_widget import ShadowedWidget
 
 
-class ObjectView(QWidget):
+class ObjectView(ShadowedWidget):
 
     def __init__(self):
         super().__init__()
         self.setMinimumWidth(800)
+        self.setObjectName("ObjectView")
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         object_layout = QVBoxLayout()
         object_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -36,6 +39,7 @@ class ObjectView(QWidget):
         self.object_frame = QLabel(AppLabels().OBJECT_FRAME)
         self.object_frame.setObjectName("ObjectView-object_frame")
         self.object_frame.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.pixmap = None
 
         self.modify_frames_button = QPushButton(AppLabels().MODIFY_FRAMES_BUTTON)
         self.modify_frames_button.clicked.connect(self.modify_frames_button_clicked)
@@ -46,6 +50,8 @@ class ObjectView(QWidget):
         tools_layout = QHBoxLayout()
         tools_layout.addWidget(self.modify_frames_button)
         tools_layout.addWidget(self.date_picker_button)
+        tools_layout.setContentsMargins(50, 0, 50, 0)
+        tools_layout.setSpacing(10)
 
         self.records_list = RecordListWidget(-1)
 
@@ -94,8 +100,8 @@ class ObjectView(QWidget):
         # name
         self.object_name.setText(object["name"])
         # object frame
-        pixmap = rescale_pixmap(QPixmap(object["frame_path"]))
-        painter = QPainter(pixmap)
+        self.pixmap = rescale_pixmap(QPixmap(object["frame_path"]))
+        painter = QPainter(self.pixmap)
 
         painter.setPen(QPen(Qt.GlobalColor.blue, 2))
         for polygon in object["in_frame"]:
@@ -112,13 +118,12 @@ class ObjectView(QWidget):
             painter.drawPolygon(frame_polygon)
 
         painter.end()
-        self.object_frame.setPixmap(pixmap)
-        self.object_frame.resize(pixmap.width(), pixmap.height())
+        self.object_frame.setPixmap(rescale_pixmap(self.pixmap, int(self.width() * 0.9)))
 
         self.modify_frames_button.setDisabled(False)
         self.date_picker_button.setDisabled(False)
         self.file_upload.setHidden(False)
-
+    
     def modify_frames_button_clicked(self):
         object = get_object_by_id(self.records_list.object_id)
         object_modifier_dialog = ObjectModifierDialog(
@@ -146,3 +151,8 @@ class ObjectView(QWidget):
             self.records_list.object_id, start_date, end_date
         )
         self.date_presenter.show()
+
+    def resizeEvent(self, event):
+        if self.pixmap is not None:
+            self.object_frame.setPixmap(rescale_pixmap(self.pixmap, int(self.width() * 0.9)))
+        return super().resizeEvent(event)

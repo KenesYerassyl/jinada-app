@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (
     QMainWindow,
     QDockWidget,
+    QWidget
 )
 from PyQt6.QtCore import QSize, Qt
 import utils.constants as constants
@@ -20,6 +21,7 @@ class MainWindow(QMainWindow):
         self.dock_widget = QDockWidget(self)
         self.dock_widget.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
         self.dock_widget.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+        self.dock_widget.setTitleBarWidget(QWidget())
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dock_widget)
 
         self.objects_container = ObjectsContainer()

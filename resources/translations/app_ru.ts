@@ -253,8 +253,12 @@
     <name>ObjectsContainer</name>
     <message>
         <location filename="../../utils/constants.py" line="147"/>
+        <source>Objects</source>
+        <translation>Список экспонатов</translation>
+    </message>
+    <message>
         <source>Add object</source>
-        <translation>Добавить объект</translation>
+        <translation type="vanished">Добавить объект</translation>
     </message>
 </context>
 <context>

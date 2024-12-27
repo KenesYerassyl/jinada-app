@@ -72,7 +72,7 @@ class ObjectListWidget(QListWidget):
             new_list_item = ObjectListItem(object[0], object[1], object[2])
             new_list_item.delete_clicked.connect(self.remove_object)
             old_list_item = QListWidgetItem()
-            old_list_item.setSizeHint(QSize(200, 60))
+            old_list_item.setSizeHint(QSize(200, 65))
             self.addItem(old_list_item)
             self.setItemWidget(old_list_item, new_list_item)
 

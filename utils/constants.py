@@ -144,7 +144,7 @@ class AppLabels:
         )
 
         self.EXHIBIT = QCoreApplication.translate("DataPresenterWidget", "Exhibit")
-        self.ADD_BUTTON = QCoreApplication.translate("ObjectsContainer", "Add object")
+        self.OBJECT_LIST = QCoreApplication.translate("ObjectsContainer", "Objects")
         self.OBJECT_UPLOADER_DIALOG_TITLE = QCoreApplication.translate(
             "ObjectUploaderDialog", "New object upload"
         )
