@@ -1,12 +1,14 @@
 from sqlalchemy import create_engine
-from local_db.object import Base, Object, ObjectRecord
+from db.object import Base, Object, ObjectRecord
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
-from local_db.db_fs import delete_file
+from db.db_fs import delete_file
 from sqlalchemy.orm import joinedload
+import paths
 from paths import Paths
 
-engine = create_engine("sqlite:///objects.db", echo=False)
+
+engine = create_engine(f"sqlite:///{paths.DB_PATH}", echo=False)
 Session = sessionmaker(bind=engine)
 
 

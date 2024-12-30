@@ -12,8 +12,8 @@ from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtCore import QSize, pyqtSignal, Qt
 from PyQt6.QtGui import QIcon
 
-from local_db.object import ObjectRecord
-from local_db.db import (
+from db.object import ObjectRecord
+from db.db import (
     get_all_records_for_list,
     insert_record,
     delete_record_by_id,

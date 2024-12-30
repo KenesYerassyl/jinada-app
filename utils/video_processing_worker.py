@@ -3,8 +3,9 @@ import numpy as np
 from typing import List, Tuple
 import cvzone
 from PyQt6.QtCore import QRunnable, pyqtSignal, pyqtSlot, QObject
-from local_db.db import get_record_by_id, get_object_by_id, update_record_status
+from db.db import get_record_by_id, get_object_by_id, update_record_status
 from utils.constants import STANDARD_WIDTH, Error
+from utils.tracker_utility import TrackerUtility, convert_detections
 from paths import Paths
 import numpy as np
 
@@ -12,10 +13,6 @@ import numpy as np
 class VideoProcessorSignals(QObject):
     progress_updated = pyqtSignal(int, int, int)
     finished = pyqtSignal(int, int)
-
-
-# TODO Init model and tracker before hand
-
 
 class VideoProcessingWorker(QRunnable):
 
@@ -27,7 +24,7 @@ class VideoProcessingWorker(QRunnable):
         self.visual = visual
         self.model = model
         self.model.gpu_init()
-        self.tracker = tracker
+        self.tracker: TrackerUtility = tracker
         self.count = 0
 
         object = get_object_by_id(object_id)
@@ -135,59 +132,60 @@ class VideoProcessingWorker(QRunnable):
             raise Exception(Error().ERROR_NO_VIDEO)
         if self.inside_polygons is None or self.outside_polygons is None:
             raise Exception(Error().ERROR_NO_POLYGONS)
-        try:
-            while True:
-                ret, frame = self.video.read()
-                if not ret:
-                    break
-                self.count += 1
-                if self.count % 10 != 0:
-                    continue
-                results = self.model.predict(frame)
-                if results is None:
-                    continue
-                for result in results:
-                    detections = []
-                    for r in result.boxes.data.tolist():
-                        x1, y1, x2, y2, score, _ = r
-                        detections.append([x1, y1, x2, y2, score])
-                    self.tracker.update(frame, detections)
+        # try:
+        while True:
+            ret, frame = self.video.read()
+            if not ret:
+                break
+            self.count += 1
+            if self.count % 10 != 0:
+                continue
+            results = self.model.predict(frame)
+            if results is None:
+                continue
+            for result in results:
+                detections = []
+                for r in result.boxes.data.tolist():
+                    x1, y1, x2, y2, score, _ = r
+                    if score > 0.8:
+                        detections.append(([x1, y1, x2 - x1, y2 - y1], score, "person"))
+                self.tracker.update(detections, frame)
 
-                for track in self.tracker.tracks:
-                    x3, y3, x4, y4 = track.bbox
-                    x3 = int(x3)
-                    y3 = int(y3)
-                    x4 = int(x4)
-                    y4 = int(y4)
-                    id = track.track_id
-                    if self.visual:
-                        self.draw_bboxes(frame, x3, y3, x4, y4, id)
-                    self.detect_collisions(x3, y4, id)
+            for track in self.tracker.tracks:
+                x3, y3, x4, y4 = track.to_ltrb()
+                x3 = int(x3)
+                y3 = int(y3)
+                x4 = int(x4)
+                y4 = int(y4)
+                id = track.track_id
                 if self.visual:
-                    self.visualize_frame(frame)
-
-                self.signals.progress_updated.emit(
-                    self.object_id,
-                    self.record_id,
-                    int(self.count / self.video.get(cv2.CAP_PROP_FRAME_COUNT) * 100),
-                )
-
-                if cv2.waitKey(1) & 0xFF == 27:
-                    break
-            for i in range(len(self.visitors)):
-                self.visitors[i] -= len(self.inside[i])
-            self.video.release()
+                    self.draw_bboxes(frame, x3, y3, x4, y4, id)
+                self.detect_collisions(x3, y4, id)
             if self.visual:
-                self.out.release()
-            cv2.destroyAllWindows()
-            self.visitors = np.array(self.visitors, dtype=object)
-            self.time_spent = np.array(self.time_spent, dtype=object)
-            np.savez(
-                Paths.record_data(self.record_id),
-                visitors=self.visitors,
-                time_spent=self.time_spent,
+                self.visualize_frame(frame)
+
+            self.signals.progress_updated.emit(
+                self.object_id,
+                self.record_id,
+                int(self.count / self.video.get(cv2.CAP_PROP_FRAME_COUNT) * 100),
             )
-            update_record_status(self.record_id)
-            self.signals.finished.emit(self.object_id, self.record_id)
-        except Exception as e:
-            print(f"{Error().ERROR_WHILE_PROCESSING_VIDEO} {self.record_id}. {e}")
+
+            if cv2.waitKey(1) & 0xFF == 27:
+                break
+        for i in range(len(self.visitors)):
+            self.visitors[i] -= len(self.inside[i])
+        self.video.release()
+        if self.visual:
+            self.out.release()
+        cv2.destroyAllWindows()
+        self.visitors = np.array(self.visitors, dtype=object)
+        self.time_spent = np.array(self.time_spent, dtype=object)
+        np.savez(
+            Paths.record_data(self.record_id),
+            visitors=self.visitors,
+            time_spent=self.time_spent,
+        )
+        update_record_status(self.record_id)
+        self.signals.finished.emit(self.object_id, self.record_id)
+        # except Exception as e:
+        #     print(f"{Error().ERROR_WHILE_PROCESSING_VIDEO} {self.record_id}. {e}")

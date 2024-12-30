@@ -2,7 +2,7 @@ from PyQt6.QtCore import QObject, QThreadPool, pyqtSignal
 from utils.video_processing_worker import VideoProcessingWorker
 from threading import Lock
 from utils.model import Model
-from utils.tracker import *
+from utils.tracker_utility import TrackerUtility
 from utils.constants import Error
 
 
@@ -23,7 +23,7 @@ class CentralVideoProcessingManager(QObject, metaclass=Singleton):
     tasks = {}
     thread_pool = QThreadPool.globalInstance()
     model = Model()
-    tracker = Tracker()
+    tracker = TrackerUtility()
     _lock = Lock()
 
     def __init__(self):

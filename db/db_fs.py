@@ -10,8 +10,6 @@ from paths import Paths
 def delete_file(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
-    else:
-        print("File not found.")
 
 
 def save_first_frame(file_path):
@@ -46,3 +44,8 @@ def save_first_frame(file_path):
         if "cap" in locals() and cap.isOpened():
             cap.release()
     return result
+
+def shutdown():
+    import shutil
+    import paths
+    shutil.rmtree(paths.SECURE_PATH)

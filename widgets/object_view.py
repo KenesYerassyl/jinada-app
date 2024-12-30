@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QPolygonF
 from PyQt6.QtCore import Qt, QPointF
-from local_db.db import (
+from db.db import (
     get_object_by_id,
     update_object_by_id,
 )
@@ -35,6 +35,7 @@ class ObjectView(ShadowedWidget):
 
         self.object_name = QLabel(AppLabels().OBJECT_NAME)
         self.object_name.setObjectName("ObjectView-object_name")
+        self.object_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.object_frame = QLabel(AppLabels().OBJECT_FRAME)
         self.object_frame.setObjectName("ObjectView-object_frame")

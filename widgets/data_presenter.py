@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 from PyQt6.QtCore import QSize, QDate
 from datetime import date
-from local_db.db import get_all_records_for_list
+from db.db import get_all_records_for_list
 import numpy as np
 import pyqtgraph as pg
 from utils.constants import Error, AppLabels

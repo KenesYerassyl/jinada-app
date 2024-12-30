@@ -14,6 +14,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setMinimumSize(QSize(1280, 720))
         self.setWindowTitle(constants.APP_NAME)
+        self.setContentsMargins(15, 15, 15, 15)
 
         self.central_widget = ObjectView()
         self.setCentralWidget(self.central_widget)

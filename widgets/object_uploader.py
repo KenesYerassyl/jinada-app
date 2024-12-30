@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from widgets.file_upload import FileUploadWidget
-from local_db.db_fs import save_first_frame, delete_file
+from db.db_fs import save_first_frame, delete_file
 from utils.constants import AppLabels, Error
 
 

@@ -10,8 +10,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import QSize, pyqtSignal
 from PyQt6.QtGui import QIcon
 
-from local_db.object import Object, ObjectRecord
-from local_db.db import (
+from db.object import Object, ObjectRecord
+from db.db import (
     get_all_objects_for_list,
     insert_object,
     delete_object_by_id,

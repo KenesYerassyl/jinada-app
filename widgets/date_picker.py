@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal, QDate
 import datetime
 from utils.constants import AppLabels
+from paths import Paths
 
 
 class DatePickerDialog(QDialog):
@@ -80,6 +81,15 @@ class RangeCalendar(QCalendarWidget):
         self.start_date: QDate = None
         self.end_date: QDate = None
         self.clicked.connect(self.date_is_clicked)
+        self.setStyleSheet(f"""
+            QCalendarWidget QWidget#qt_calendar_prevmonth {{
+                qproperty-icon: url('{Paths.ARROW_LEFT_ICON}');
+            }}
+
+            QCalendarWidget QWidget#qt_calendar_nextmonth {{
+                qproperty-icon: url('{Paths.ARROW_RIGHT_ICON}');
+            }}
+        """)
 
     def date_is_clicked(self, date):
         if self.start_date and self.end_date:

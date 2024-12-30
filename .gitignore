@@ -1,11 +1,8 @@
 __pycache__
 jinada-venv
 models
-samples
-outputs
 .DS_Store
 .vscode
-objects.db
-./local_db/object_frames
-./local_db/record_data
 main.spec
+build
+dist
