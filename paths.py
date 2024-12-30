@@ -16,6 +16,7 @@ class Paths:
     QSS = os.path.join(BASEDIR, RESOURCES, "style.qss")
     QSS_VARIABLES = os.path.join(BASEDIR, RESOURCES, "variables.txt")
     MACOSX_ICON = os.path.join(BASEDIR, RESOURCES, "icon_macosx.icns")
+    WINDOWS_ICON = os.path.join(BASEDIR, RESOURCES, "icon_windows.ico")
     MOVE_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "move.svg")
     CONFIRM_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "confirm.svg")
     REJECT_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "reject.svg")
