@@ -6,3 +6,4 @@ models
 main.spec
 build
 dist
+/deep-person-reid
