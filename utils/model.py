@@ -7,7 +7,7 @@ class Model:
     def __init__(self):
         self.model = YOLO(Paths.YOLO_MODEL_PATH)
         self.class_name = 0
-        self.confidence = 0.5
+        self.confidence = 0.4
         self.gpu_init()
 
     def gpu_init(self):

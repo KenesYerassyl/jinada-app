@@ -33,7 +33,7 @@ class CentralVideoProcessingManager(QObject, metaclass=Singleton):
         task = {"record_id": record_id, "progress": 0}
         try:
             worker = VideoProcessingWorker(
-                object_id, task["record_id"], self.model, self.tracker
+                object_id, task["record_id"], self.model, self.tracker, visual=True
             )
             worker.signals.progress_updated.connect(self.on_progress_updated)
             worker.signals.finished.connect(self.on_finished)
