@@ -10,6 +10,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from widgets.file_upload import FileUploadWidget
 from db.db_fs import save_first_frame, delete_file
 from utils.constants import AppLabels, Error
+import logging
 
 
 class ObjectUploaderDialog(QDialog):
@@ -53,27 +54,33 @@ class ObjectUploaderDialog(QDialog):
         layout.addWidget(self.button_box)
         self.setLayout(layout)
 
-    def video_uploaded(self, file_path):
-        upload_result = save_first_frame(file_path)
+    def video_uploaded(self, file_path: str):
+        try:
+            upload_result = save_first_frame(file_path)
 
-        if upload_result[0] == 0:
-            QMessageBox.critical(
-                self,
-                Error().ERROR_DURING_UPLOAD,
-                upload_result[1],
-                buttons=QMessageBox.StandardButton.Ok,
-            )
-        else:
-            self.file_path = file_path
-            self.frame_path = upload_result[1]
-            self.status_label.setText(f"{AppLabels().STATUS_LABEL_UPDATED} {file_path}")
+            if upload_result[0] == 0:
+                QMessageBox.critical(
+                    self,
+                    Error().ERROR_DURING_UPLOAD,
+                    upload_result[1],
+                    buttons=QMessageBox.StandardButton.Ok,
+                )
+            else:
+                self.file_path = file_path
+                self.frame_path = upload_result[1]
+                self.status_label.setText(f"{AppLabels().STATUS_LABEL_UPDATED} {file_path}")
 
-        self.next_button.setDisabled(self.file_path == "" or self.frame_path == "")
+            self.next_button.setDisabled(self.file_path == "" or self.frame_path == "")
+        except Exception as e:
+            logging.error(f"Error occurred during video uploading: {e}")
 
     def on_next(self):
         self.object_uploaded.emit(self.file_path, self.frame_path)
         self.accept()
 
     def on_cancel(self):
-        delete_file(self.frame_path)
+        try:
+            delete_file(self.frame_path)
+        except Exception as e:
+            logging.error(f"Error occurred when video upload cancelled: {e}")
         self.reject()

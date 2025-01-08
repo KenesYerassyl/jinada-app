@@ -19,22 +19,28 @@ from db.db import (
 )
 from datetime import datetime
 from utils.cvpm import CentralVideoProcessingManager
-from utils.constants import Error
 from paths import Paths
-
+from typing import List, Tuple
+import logging
 
 class ObjectListItem(QWidget):
 
     delete_clicked = pyqtSignal(int)
 
-    def __init__(self, object_id, name, date: datetime):
+    def __init__(self, object_id: int, name: str, date: datetime):
         super().__init__()
+        self.object_id = object_id
+        self.object_name_text = name
+        self.object_date_time = date
+        self.setup_ui()
+
+    def setup_ui(self):
         info_layout = QVBoxLayout()
 
-        self.object_name = QLabel(name)
+        self.object_name = QLabel(self.object_name_text)
         self.object_name.setObjectName("ObjectListItem-object_name")
-        self.object_id = object_id
-        self.object_date = QLabel(date.strftime("%Y-%m-%d %H:%M:%S"))
+        
+        self.object_date = QLabel(self.object_date_time.strftime("%Y-%m-%d %H:%M:%S"))
         self.object_date.setObjectName("ObjectListItem-object_date")
 
         info_layout.addWidget(self.object_name)
@@ -66,17 +72,21 @@ class ObjectListWidget(QListWidget):
         self.load_data()
 
     def load_data(self):
-        self.clear()
-        objects = get_all_objects_for_list()
-        for object in objects:
-            new_list_item = ObjectListItem(object[0], object[1], object[2])
-            new_list_item.delete_clicked.connect(self.remove_object)
-            old_list_item = QListWidgetItem()
-            old_list_item.setSizeHint(QSize(200, 65))
-            self.addItem(old_list_item)
-            self.setItemWidget(old_list_item, new_list_item)
+        try:
+            self.clear()
+            objects = get_all_objects_for_list()
+            for object in objects:
+                new_list_item = ObjectListItem(object[0], object[1], object[2])
+                new_list_item.delete_clicked.connect(self.remove_object)
+                old_list_item = QListWidgetItem()
+                old_list_item.setSizeHint(QSize(200, 65))
+                self.addItem(old_list_item)
+                self.setItemWidget(old_list_item, new_list_item)
+        except Exception as e:
+            logging.error(f"Error while loading data to Object List: {e}")
+            
 
-    def add_object(self, name, file_path, frame_path, in_frame, out_frame):
+    def add_object(self, name: str, file_path: str, frame_path: str, in_frame: List[List[Tuple[int, int]]], out_frame: List[List[Tuple[int, int]]]):
         object = Object(name, frame_path, in_frame, out_frame)
         object_record = ObjectRecord(file_path)
         try:
@@ -85,17 +95,17 @@ class ObjectListWidget(QListWidget):
             CentralVideoProcessingManager().add_task(object_id, record_id)
             self.load_data()
         except Exception as e:
-            print(f"{Error().ERROR_WHILE_ADDING_OBJECT} {e}")
+            logging.error(f"Unexpected error occurred when trying to add an object: {e}")
 
-    def remove_object(self, object_id):
+    def remove_object(self, object_id: int):
         try:
-            # TODO: Cancel all running tasks, and notify the user about it
+            CentralVideoProcessingManager().cancel_tasks(object_id)
             delete_object_by_id(object_id)
             for i in range(self.count()):
                 widget: ObjectListItem = self.itemWidget(self.item(i))
-                if widget.object_id == object_id:
+                if widget and widget.object_id == object_id:
                     self.takeItem(i)
                     break
             self.object_deleted.emit()
         except Exception as e:
-            print(f"{Error().ERROR_WHILE_DELETING_OBJECT} {e}")
+            logging.error(f"Unexpected error occurred when trying to delete an object: {e}")

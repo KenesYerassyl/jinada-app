@@ -18,6 +18,7 @@ from widgets.zoompan_graphics_view import ZoomPanGraphicsView
 from utils.pyqtgui_utils import rescale_pixmap, copy_ellipse_item, copy_line_item
 from utils.constants import AppLabels
 from paths import Paths
+import logging
 
 # TODO: Make sure that name is unique
 
@@ -91,26 +92,32 @@ class ObjectModifierDialog(QDialog):
         self.check_validity(self.polygon_drawer.scene.doesPolygonsExist())
 
     def on_upload(self):
-        for polygon in self.polygon_drawer.scene.items():
-            if isinstance(polygon, PolygonQGraphicsItemGroup):
-                polygon_frame = []
-                for child_item in polygon.childItems():
-                    if isinstance(child_item, QGraphicsEllipseItem):
-                        rect = child_item.boundingRect()
-                        center = child_item.mapToScene(rect.center())
-                        polygon_frame.append((center.x(), center.y()))
-                if polygon.frame_type == 0:
-                    self.in_frame.append(polygon_frame)
-                else:
-                    self.out_frame.append(polygon_frame)
-        self.object_modified.emit(
-            self.name, self.file_path, self.frame_path, self.in_frame, self.out_frame
-        )
-        self.accept()
+        try:
+            for polygon in self.polygon_drawer.scene.items():
+                if isinstance(polygon, PolygonQGraphicsItemGroup):
+                    polygon_frame = []
+                    for child_item in polygon.childItems():
+                        if isinstance(child_item, QGraphicsEllipseItem):
+                            rect = child_item.boundingRect()
+                            center = child_item.mapToScene(rect.center())
+                            polygon_frame.append((center.x(), center.y()))
+                    if polygon.frame_type == 0:
+                        self.in_frame.append(polygon_frame)
+                    else:
+                        self.out_frame.append(polygon_frame)
+            self.object_modified.emit(
+                self.name, self.file_path, self.frame_path, self.in_frame, self.out_frame
+            )
+            self.accept()
+        except Exception as e:
+            logging.error(f"Something went wrong when doing modification of object: {e}")
 
     def on_back(self):
-        self.object_modification_cancelled.emit()
-        self.reject()
+        try:
+            self.object_modification_cancelled.emit()
+            self.reject()
+        except Exception as e:
+            logging.error(f"Something went wrong when pressed back from ObjectModifierDialog")
 
 
 class PolygonDrawer(QWidget):

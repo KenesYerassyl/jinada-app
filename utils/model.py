@@ -1,7 +1,7 @@
 from ultralytics import YOLO
 from paths import Paths
 import torch
-
+import logging
 
 class Model:
     def __init__(self):
@@ -12,16 +12,19 @@ class Model:
 
     def gpu_init(self):
         if torch.cuda.is_available():
-            device = "cuda"
+            device = torch.device("cuda")
         elif torch.backends.mps.is_available():
-            device = "mps"
+            device = torch.device("mps")
         else:
-            device = "cpu"
-        self.model.to(device)
+            device = torch.device("cpu")
+        
+        self.device = device
+        self.model.to(self.device)
+        logging.info(f"Using device: {self.device}")
 
     def predict(self, frame):
-        predictions = self.model(
-            frame, verbose=False, classes=self.class_name, conf=self.confidence
+        predictions = self.model.track(
+            frame, persist=True, tracker="bytetrack.yaml", verbose=False, classes=self.class_name, conf=self.confidence
         )
         if predictions[0].boxes.data.numel() == 0:
             return None

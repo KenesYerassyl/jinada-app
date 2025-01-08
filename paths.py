@@ -8,7 +8,7 @@ MODELS = "models"
 ICONS = "icons"
 RECORD_DATA = "record_data"
 TRANSLATIONS = "translations"
-SECURE_PATH = os.path.join(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppDataLocation), ".myappdata")  # Hidden folder
+SECURE_PATH = os.path.join(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppDataLocation), ".jinada_appdata")  # Hidden folder
 DB_PATH = os.path.join(SECURE_PATH, "objects.db")
 
 

@@ -17,57 +17,9 @@ class Error:
         return cls._instance
 
     def _initialize(self):
-        self.ERROR_RECORDINGS_SHAPE_MISMATCH = QCoreApplication.translate(
-            "DataPresenterModel",
-            "The shape of the recordings doesn't match. Some error occured that recording do not belong to the same object.",
-        )
-        self.ERROR_WHILE_ADDING_OBJECT = QCoreApplication.translate(
-            "ObjectListWidget", "Unexpected error occured while adding an object:"
-        )
-        self.ERROR_WHILE_DELETING_OBJECT = QCoreApplication.translate(
-            "ObjectListWidget", "Unexpected error occured while deleting an object:"
-        )
         self.ERROR_DURING_UPLOAD = QCoreApplication.translate(
             "ObjectUploaderDialog", "Error during uploding"
         )
-        self.ERROR_WHILE_ADDING_RECORD = QCoreApplication.translate(
-            "RecordListWidget", "Unexpected error occured while adding a record:"
-        )
-        self.ERROR_WHILE_DELETING_RECORD = QCoreApplication.translate(
-            "RecordListWidget", "Unexpected error occured while deleting a record:"
-        )
-        self.ERROR_WHILE_SETTING_POLYGONS = QCoreApplication.translate(
-            "VideoProcessingWorker", "Unexpected error occured while setting polygons:"
-        )
-        self.ERROR_NO_POLYGONS = QCoreApplication.translate(
-            "VideoProcessingWorker", "No polygons"
-        )
-        self.ERROR_NO_VIDEO = QCoreApplication.translate(
-            "VideoProcessingWorker", "No video"
-        )
-        self.ERROR_WHILE_SETTING_VIDEO = QCoreApplication.translate(
-            "VideoProcessingWorker", "Wrong video path and error:"
-        )
-        self.ERROR_WHILE_PROCESSING_VIDEO = QCoreApplication.translate(
-            "VideoProcessingWorker", "Something went wrong while processing video:"
-        )
-        self.ERROR_WHILE_ADDING_TASK = QCoreApplication.translate(
-            "CentralVideoProcessingManager",
-            "Unexpected error occured while processing the video:",
-        )
-        self.ERROR_NO_VIDEO_FILE = QCoreApplication.translate(
-            "DB_FS", "Video file not found:"
-        )
-        self.ERROR_CANNOT_OPEN_FILE = QCoreApplication.translate(
-            "DB_FS", "Cannot open video file:"
-        )
-        self.ERROR_CANNOT_READ_FRAME = QCoreApplication.translate(
-            "DB_FS", "Could not read the first frame of the video."
-        )
-        self.ERROR_WHILE_SAVING_FRAME = QCoreApplication.translate(
-            "DB_FS", "An unexpected error occurred while saving first frame:"
-        )
-
 
 class AppLabels:
     _instance = None

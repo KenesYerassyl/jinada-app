@@ -5,21 +5,27 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QHBoxLayout,
     QWidget,
+    QFileDialog
 )
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QPolygonF
 from PyQt6.QtCore import Qt, QPointF
 from db.db import (
     get_object_by_id,
     update_object_by_id,
+    get_all_records_for_export
 )
 from utils.pyqtgui_utils import rescale_pixmap
+from utils.constants import AppLabels
 from widgets.file_upload import FileUploadWidget
 from widgets.object_modifier import ObjectModifierDialog
 from widgets.date_picker import DatePickerDialog
-from widgets.data_presenter import DataPresenterWidget
+# from widgets.data_presenter import DataPresenterWidget
 from widgets.record_list import RecordListWidget
-from utils.constants import AppLabels
 from widgets.shadowed_widget import ShadowedWidget
+import logging
+import pandas as pd
+from paths import Paths
+import numpy as np
 
 
 class ObjectView(ShadowedWidget):
@@ -94,36 +100,42 @@ class ObjectView(ShadowedWidget):
         self.records_list.load_data()
 
     def load_object(self, object_id):
-        self.records_list.object_id = object_id
-        self.records_list.load_data()
+        try:
+            self.records_list.object_id = object_id
+            self.records_list.load_data()
 
-        object = get_object_by_id(self.records_list.object_id)
-        # name
-        self.object_name.setText(object["name"])
-        # object frame
-        self.pixmap = rescale_pixmap(QPixmap(object["frame_path"]))
-        painter = QPainter(self.pixmap)
+            object = get_object_by_id(self.records_list.object_id)
+            if not object:
+                raise ValueError("Object not found.")
+            # name
+            self.object_name.setText(object["name"])
+            # object frame
+            self.pixmap = rescale_pixmap(QPixmap(object["frame_path"]))
+            painter = QPainter(self.pixmap)
 
-        painter.setPen(QPen(Qt.GlobalColor.blue, 2))
-        for polygon in object["in_frame"]:
-            frame_polygon = QPolygonF()
-            for points in polygon:
-                frame_polygon.append(QPointF(points[0], points[1]))
-            painter.drawPolygon(frame_polygon)
+            painter.setPen(QPen(Qt.GlobalColor.blue, 2))
+            for polygon in object["in_frame"]:
+                frame_polygon = QPolygonF()
+                for points in polygon:
+                    frame_polygon.append(QPointF(points[0], points[1]))
+                painter.drawPolygon(frame_polygon)
 
-        painter.setPen(QPen(Qt.GlobalColor.green, 2))
-        for polygon in object["out_frame"]:
-            frame_polygon = QPolygonF()
-            for points in polygon:
-                frame_polygon.append(QPointF(points[0], points[1]))
-            painter.drawPolygon(frame_polygon)
+            painter.setPen(QPen(Qt.GlobalColor.green, 2))
+            for polygon in object["out_frame"]:
+                frame_polygon = QPolygonF()
+                for points in polygon:
+                    frame_polygon.append(QPointF(points[0], points[1]))
+                painter.drawPolygon(frame_polygon)
 
-        painter.end()
-        self.object_frame.setPixmap(rescale_pixmap(self.pixmap, int(self.width() * 0.9)))
+            painter.end()
+            self.object_frame.setPixmap(rescale_pixmap(self.pixmap, int(self.width() * 0.9)))
 
-        self.modify_frames_button.setDisabled(False)
-        self.date_picker_button.setDisabled(False)
-        self.file_upload.setHidden(False)
+            self.modify_frames_button.setDisabled(False)
+            self.date_picker_button.setDisabled(False)
+            self.file_upload.setHidden(False)
+        except Exception as e:
+            logging.error(f"Error loading object with ID {object_id}: {e}")
+            self.reset()
     
     def modify_frames_button_clicked(self):
         object = get_object_by_id(self.records_list.object_id)
@@ -143,17 +155,38 @@ class ObjectView(ShadowedWidget):
         self.load_object(self.records_list.object_id)
 
     def date_picker_button_clicked(self):
-        data_picker_dialog = DatePickerDialog(self)
-        data_picker_dialog.date_picked.connect(self.show_data)
-        data_picker_dialog.open()
+        date_picker_dialog = DatePickerDialog(self)
+        date_picker_dialog.date_picked.connect(self.show_data)
+        date_picker_dialog.open()
 
     def show_data(self, start_date, end_date):
-        self.date_presenter = DataPresenterWidget(
-            self.records_list.object_id, start_date, end_date
-        )
-        self.date_presenter.show()
+        try:
+            records = get_all_records_for_export()
+            for i, record in enumerate(records):
+                np_data = np.load(Paths.record_data_npz(record_id=record["record_id"]), allow_pickle=True)
+                records[i]["visitors"] = np_data["visitors"][0]
+            data = {
+                "Название": [record["object_name"] for record in records],
+                "ID": [record["record_id"] for record in records],
+                "Кол-во посетителей": [record["visitors"] for record in records],
+                "Дата": [record["date_uploaded"].strftime("%Y-%m-%d %H:%M:%S") for record in records],
+            }
+            df = pd.DataFrame(data)
+            file_path, _ = QFileDialog.getSaveFileName(self, "Save Excel File", "", "Excel Files (*.xlsx);;All Files (*)")
+            if file_path:
+                df.to_excel(file_path, index=False)
+        except Exception as e:
+            logging.error(f"Error trying to export statistics: {e}")
+        finally:
+            logging.info(f"Success! Excel file saved to:\n{file_path}")
+        # self.date_presenter = DataPresenterWidget(
+        #     self.records_list.object_id, start_date, end_date
+        # )
+        # self.date_presenter.show()
 
     def resizeEvent(self, event):
         if self.pixmap is not None:
-            self.object_frame.setPixmap(rescale_pixmap(self.pixmap, int(self.width() * 0.9)))
+            new_width = int(self.width() * 0.9)
+            if self.object_frame.pixmap() is None or self.object_frame.pixmap().width() != new_width:
+                self.object_frame.setPixmap(rescale_pixmap(self.pixmap, new_width))
         return super().resizeEvent(event)

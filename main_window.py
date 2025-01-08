@@ -7,6 +7,7 @@ from PyQt6.QtCore import QSize, Qt
 import utils.constants as constants
 from widgets.object_view import ObjectView
 from widgets.objects_container import ObjectsContainer
+import logging
 
 
 class MainWindow(QMainWindow):
@@ -30,5 +31,8 @@ class MainWindow(QMainWindow):
         self.objects_container.list.object_deleted.connect(self.central_widget.reset)
         self.dock_widget.setWidget(self.objects_container)
 
-    def load_object_view(self, object_id):
+    def load_object_view(self, object_id: int):
+        if object_id is None:
+            logging.error(f"Error: Invalid object ID: {object_id}")
+            return
         self.central_widget.load_object(object_id)

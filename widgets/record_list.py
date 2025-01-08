@@ -20,15 +20,15 @@ from db.db import (
 )
 from datetime import datetime
 from utils.cvpm import CentralVideoProcessingManager
-from utils.constants import Error
 from paths import Paths
+import logging
 
 
 class RecordListItem(QWidget):
 
     delete_clicked = pyqtSignal(int)
 
-    def __init__(self, record_id, file_path, date: datetime, is_processed: bool):
+    def __init__(self, record_id: int, file_path: str, date: datetime, is_processed: bool):
         super().__init__()
         self.record_id = record_id
 
@@ -68,7 +68,7 @@ class RecordListItem(QWidget):
     def delete_button_clicked(self):
         self.delete_clicked.emit(self.record_id)
 
-    def setProgress(self, new_value):
+    def setProgress(self, new_value: int):
         self.progress_bar.setValue(new_value)
 
 
@@ -76,7 +76,7 @@ class RecordListWidget(QListWidget):
 
     record_deleted = pyqtSignal()
 
-    def __init__(self, object_id):
+    def __init__(self, object_id: int):
         super().__init__()
         self.setObjectName("RecordListWidget")
         self.object_id = object_id
@@ -89,42 +89,45 @@ class RecordListWidget(QListWidget):
         self.load_data()
 
     def load_data(self):
-        self.clear()
-        in_progress = {}
-        if self.object_id in CentralVideoProcessingManager().tasks:
-            for task in CentralVideoProcessingManager().tasks[self.object_id]:
-                in_progress[task["record_id"]] = task["progress"]
-        records = get_all_records_for_list(self.object_id)
-        for record in records:
-            new_list_item = RecordListItem(record[0], record[1], record[2], record[3])
-            if not record[3]:
-                if record[0] in in_progress:
-                    new_list_item.setProgress(in_progress[record[0]])
-                else:
-                    CentralVideoProcessingManager().add_task(self.object_id, record[0])
-            new_list_item.delete_clicked.connect(self.remove_record)
-            old_list_item = QListWidgetItem()
-            old_list_item.setSizeHint(QSize(200, 110))
-            self.addItem(old_list_item)
-            self.setItemWidget(old_list_item, new_list_item)
-        if len(records) > 0:
-            self.setFixedHeight(self.count() * self.sizeHintForRow(0))
-        else:
-            self.setMinimumHeight(self.minimumSizeHint().width())
-            self.setMaximumHeight(16777215)
+        try:
+            self.clear()
+            in_progress = {}
+            if self.object_id in CentralVideoProcessingManager().tasks:
+                for task in CentralVideoProcessingManager().tasks[self.object_id]:
+                    in_progress[task["record_id"]] = task["progress"]
+            records = get_all_records_for_list(self.object_id)
+            for record in records:
+                new_list_item = RecordListItem(record[0], record[1], record[2], record[3])
+                if not record[3]:
+                    if record[0] in in_progress:
+                        new_list_item.setProgress(in_progress[record[0]])
+                    else:
+                        CentralVideoProcessingManager().add_task(self.object_id, record[0])
+                new_list_item.delete_clicked.connect(self.remove_record)
+                old_list_item = QListWidgetItem()
+                old_list_item.setSizeHint(QSize(200, 110))
+                self.addItem(old_list_item)
+                self.setItemWidget(old_list_item, new_list_item)
+            if len(records) > 0:
+                self.setFixedHeight(self.count() * self.sizeHintForRow(0))
+            else:
+                self.setMinimumHeight(self.minimumSizeHint().width())
+                self.setMaximumHeight(16777215)
+        except Exception as e:
+            logging.error(f"Error while loading data to Record List: {e}")
 
-    def add_record(self, file_path):
+    def add_record(self, file_path: str):
         object_record = ObjectRecord(file_path)
         try:
             record_id = insert_record(self.object_id, object_record)
             CentralVideoProcessingManager().add_task(self.object_id, record_id)
             self.load_data()
         except Exception as e:
-            print(f"{Error().ERROR_WHILE_ADDING_RECORD} {e}")
+            logging.error(f"Error while adding a record: {e}")
 
-    def remove_record(self, record_id):
+    def remove_record(self, record_id: int):
         try:
-            # TODO terminate task if it is actively processing record
+            CentralVideoProcessingManager().cancel_tasks(self.object_id, record_id)
             delete_record_by_id(record_id)
             for i in range(self.count()):
                 widget: RecordListItem = self.itemWidget(self.item(i))
@@ -132,9 +135,9 @@ class RecordListWidget(QListWidget):
                     self.takeItem(i)
                     break
         except Exception as e:
-            print(f"{Error().ERROR_WHILE_DELETING_RECORD} {e}")
+            logging.error(f"Error while deleting a record: {e}")
 
-    def record_updated(self, object_id, record_id, progress):
+    def record_updated(self, object_id: int, record_id: int, progress: int):
         if object_id == self.object_id:
             for i in range(self.count()):
                 widget: RecordListItem = self.itemWidget(self.item(i))
@@ -142,7 +145,7 @@ class RecordListWidget(QListWidget):
                     widget.setProgress(progress)
                     break
 
-    def record_finished_processing(self, object_id, record_id):
+    def record_finished_processing(self, object_id: int, record_id: int):
         if object_id == self.object_id:
             for i in range(self.count()):
                 widget: RecordListItem = self.itemWidget(self.item(i))
