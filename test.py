@@ -5,12 +5,12 @@ from db.db import insert_record
 from db.object import ObjectRecord
 import os
 
-def print_data():
-    data = np.load("/Users/Yerassyl/Library/Application Support/.jinada_appdata/record_data/1.npz", allow_pickle=True)
-    print(data["visitors"])
-    print(data["time_spent"])
+# def print_data():
+#     data = np.load("/Users/Yerassyl/Library/Application Support/.jinada_appdata/record_data/1.npz", allow_pickle=True)
+#     print(data["visitors"])
+#     print(data["time_spent"])
 
-print_data()
+# print_data()
 
 
 # def generate_data(record_id):
@@ -43,3 +43,24 @@ print_data()
 #         days += timedelta(1)
 
 # generate_records()
+
+
+import numpy as np
+import cv2
+temp = (40000, 40000)
+arr = np.array([[[ 1388,   184],
+  [ 1358,   516],
+  [ 1700,   590],
+  [ 1468,   340],
+  [ 1234,   286]],
+
+ [[  666,   206],
+  [  834,   362],
+  [  892,   172],
+  [40000, 40000],
+  [40000, 40000]]])
+t = arr[0][arr[0] != temp].reshape(-1, 2)
+print(t.dtype)
+
+
+print(cv2.pointPolygonTest(t, (3, 4), False))

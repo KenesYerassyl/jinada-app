@@ -1,10 +1,10 @@
 import cv2
 import os
-from datetime import datetime
 from paths import Paths, SECURE_PATH
 import logging
 import shutil
 from typing import Tuple
+import time
 
 # DB File System Handler
 
@@ -28,8 +28,10 @@ def save_first_frame(file_path: str) -> Tuple[int, str]:
     """
     # TODO: Add validation, make sure it is video
     result = ()
-    file_name = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    file_name = f"object_frame_{int(time.time())}"
     output_image_path = os.path.join(Paths.OBJECT_FRAMES, f"{file_name}.jpg")
+
     try:
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"No video file found at this location {file_path}")

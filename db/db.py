@@ -111,6 +111,7 @@ def get_all_records_for_export():
                     "record_id": record.id,
                     "date_uploaded": record.date_uploaded,
                     "object_name": parent_name,
+                    "is_processed": record.is_processed
                 })
             return data
     except Exception as e:

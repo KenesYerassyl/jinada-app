@@ -21,7 +21,7 @@ from paths import Paths
 import logging
 
 # TODO: Make sure that name is unique
-
+# TODO: Make sure that polygon has at least 3 points
 
 class ObjectModifierDialog(QDialog):
 
@@ -182,7 +182,6 @@ class PolygonDrawer(QWidget):
     def load_image(self, frame_path):
         pixmap = rescale_pixmap(QPixmap(frame_path))
         if pixmap.isNull():
-            print(f"Failed to load image: {frame_path}")
             return
         self.scene.addItem(QGraphicsPixmapItem(pixmap))
         self.scene.setSceneRect(QRectF(pixmap.rect()))

@@ -162,9 +162,10 @@ class ObjectView(ShadowedWidget):
     def show_data(self, start_date, end_date):
         try:
             records = get_all_records_for_export()
+            records = [record for record in records if record["is_processed"]]
             for i, record in enumerate(records):
                 np_data = np.load(Paths.record_data_npz(record_id=record["record_id"]), allow_pickle=True)
-                records[i]["visitors"] = np_data["visitors"][0]
+                records[i]["visitors"] = np.sum(np_data["visitors"])
             data = {
                 "Название": [record["object_name"] for record in records],
                 "ID": [record["record_id"] for record in records],

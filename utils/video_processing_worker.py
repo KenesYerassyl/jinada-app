@@ -9,6 +9,7 @@ from utils.model import Model
 from paths import Paths
 import logging
 
+NULLPOINT = (20000, 20000)
 
 class VideoProcessorSignals(QObject):
     progress_updated = pyqtSignal(int, int, int)
@@ -27,38 +28,35 @@ class VideoProcessingWorker(QRunnable):
         self._is_canceled = False
 
         object = get_object_by_id(object_id)
-        self._set_polygons(object["in_frame"], object["out_frame"])
         record = get_record_by_id(record_id)
-        self._set_video(record["file_path"])
+        self._set_attrs(len(object["in_frame"]))
+        self._set_polygons(record["file_path"], object["in_frame"], object["out_frame"])
 
     def cancel(self):
         """Cancel the current process"""
         self._is_canceled = True
-    
-    def _set_polygons(self, in_polygon: List[List[Tuple[int, int]]], out_polygon: List[List[Tuple[int, int]]]) -> None:
+
+    def _set_attrs(self, in_polygon_size: int) -> None:
         """
         Initialize the polygons and other properties
         """
         try:
+            self.visitors = [0 for _ in range(in_polygon_size)]
+            self.entry_times = [{} for _ in range(in_polygon_size)]
+            self.time_spent = [[] for _ in range(in_polygon_size)]
+            self.inside = [set() for _ in range(in_polygon_size)]
 
-            self.n_inside_polygons = len(in_polygon)
-            self.n_outside_polygons = len(out_polygon)
-            self.visitors = [0 for _ in range(self.n_inside_polygons)]
-            self.entry_times = [{} for _ in range(self.n_inside_polygons)]
-            self.time_spent = [[] for _ in range(self.n_inside_polygons)]
-            self.inside = [set() for _ in range(self.n_inside_polygons)]
-
-            self.inside_polygons = np.array(in_polygon, dtype=np.int32)
-            self.outside_polygons = np.array(out_polygon, dtype=np.int32)
-            logging.info("Polygons have been set successfully.")
         except TypeError as te:
             logging.error(f"Type error while setting polygons: {te}")
+            raise
         except ValueError as ve:
             logging.error(f"Value error while setting polygons: {ve}")
+            raise
         except Exception as e:
             logging.error(f"Unexpected error occurred while setting polygons: {e}")
+            raise
 
-    def _set_video(self, video_path: str) -> None:
+    def _set_polygons(self, video_path: str, in_polygon: List[List[Tuple[int, int]]], out_polygon: List[List[Tuple[int, int]]]) -> None:
         """
         Access and initialize the video the set its properties
         """
@@ -81,38 +79,40 @@ class VideoProcessingWorker(QRunnable):
             height_aspect = height / modified_height
             width_aspect = width / modified_width
             
-            self.inside_polygons = self._scale_polygons(
-                self.inside_polygons, width_aspect, height_aspect
-            )
 
-            self.outside_polygons = self._scale_polygons(
-                self.outside_polygons, width_aspect, height_aspect
-            )
+            self.inside_polygons = self._preprocess_polygons(in_polygon, width_aspect, height_aspect)
+            self.outside_polygons = self._preprocess_polygons(out_polygon, width_aspect, height_aspect)
 
-            logging.info("Video has been set successfully.")
+            logging.info("Polygons have been set successfully.")
         except ValueError as ve:
             logging.error(f"Value error while setting video: {ve}")
+            raise
         except Exception as e:
             logging.error(f"Unexpected error occurred while setting video: {e}")
+            raise
 
-    def _scale_polygons(self, polygons: np.ndarray, width_aspect: float, height_aspect: float) -> np.ndarray:
+    def _preprocess_polygons(self, polygons: List[List[Tuple[int, int]]], width_aspect: float, height_aspect: float, pad_value: Tuple[int, int] = NULLPOINT) -> np.ndarray:
         """
         Scale polygons based on width and height aspect ratios.
         """
         try:
-            scaled_polygons = []
+            max_len = max(len(polygon) for polygon in polygons)
+
+            processed_polygons = []
             for polygon in polygons:
-                scaled_polygon = [
+                processed_polygon = [
                     (
                         int(point[0] * width_aspect),
                         int(point[1] * height_aspect),
                     )
                     for point in polygon
                 ]
-                scaled_polygons.append(scaled_polygon)
-            return np.array(scaled_polygons, dtype=np.int32)
+                padding_needed = max_len - len(processed_polygon)
+                processed_polygons.append(processed_polygon + [pad_value] * padding_needed)
+                
+            return np.array(processed_polygons, dtype=np.int32)
         except Exception as e:
-            logging.error(f"Error while scaling polygons: {e}")
+            logging.error(f"Error while processing polygons: {e}")
             raise
 
     @pyqtSlot()
@@ -130,6 +130,13 @@ class VideoProcessingWorker(QRunnable):
                     break # Exit if no more frames
 
                 self.count += 1
+
+                self.signals.progress_updated.emit(
+                    self.object_id,
+                    self.record_id,
+                    int(self.count / self.video.get(cv2.CAP_PROP_FRAME_COUNT) * 100),
+                )
+
                 if self.count % 4 != 0:
                     continue # Skip processing most frames for efficiency
 
@@ -147,11 +154,6 @@ class VideoProcessingWorker(QRunnable):
                     x, y, w, h = (int(box[0].item()), int(box[1].item()), int(box[2].item()), int(box[3].item()))
                     self._check_for_intersections((int(x - w/2), int(y + h/2)), (int(x + w/2), int(y + h/2)), track_id)
 
-                self.signals.progress_updated.emit(
-                    self.object_id,
-                    self.record_id,
-                    int(self.count / self.video.get(cv2.CAP_PROP_FRAME_COUNT) * 100),
-                )
                 if self.visual:
                     self._visualize_frame(results[0].plot())
 
@@ -162,9 +164,11 @@ class VideoProcessingWorker(QRunnable):
                 self._finalize_tracking()
 
         except ValueError as ve:
-            logging.error(f"Validation error in run: {ve}")
+            logging.error(f"Value error in run: {ve}")
+            raise
         except Exception as e:
             logging.error(f"Unexpected error during processing: {e}")
+            raise
         finally:
             self._cleanup()
 
@@ -179,36 +183,49 @@ class VideoProcessingWorker(QRunnable):
             obj_id (int): Unique ID of the tracked object.
         """
         try:
-            is_lcorner_inside = False # False if left corner lies inside of any in-polygon, True if otherwise
-            is_rcorner_inside = False # False if right corner lies inside of any in-polygon, True if otherwise
-            for i in range(self.n_inside_polygons):
-                is_lcorner_inside = is_lcorner_inside or cv2.pointPolygonTest(self.inside_polygons[i], left_corner, False) >= 0
-                is_rcorner_inside = is_rcorner_inside or cv2.pointPolygonTest(self.inside_polygons[i], right_corner, False) >= 0
-                if is_lcorner_inside and is_rcorner_inside:
+            is_lcorner_inside_any = False # False if left corner lies inside of any in-polygon, True if otherwise
+            is_rcorner_inside_any = False # False if right corner lies inside of any in-polygon, True if otherwise
+            for i, polygon in enumerate(self.inside_polygons):
+                polygon_trunc = polygon[polygon != NULLPOINT].reshape(-1, 2)
+
+                is_lcorner_inside_this = cv2.pointPolygonTest(polygon_trunc, left_corner, False) >= 0
+                is_rcorner_inside_this = cv2.pointPolygonTest(polygon_trunc, right_corner, False) >= 0
+                is_lcorner_inside_any = is_lcorner_inside_any or is_lcorner_inside_this
+                is_rcorner_inside_any = is_rcorner_inside_any or is_rcorner_inside_this
+
+                if is_lcorner_inside_this and is_rcorner_inside_this:
                     if obj_id not in self.inside[i]:
                         self.inside[i].add(obj_id)
                         self.entry_times[i][obj_id] = self.count
-                        break
+                        return
 
-            for i in range(self.n_outside_polygons):
-                if cv2.pointPolygonTest(self.outside_polygons[i], left_corner, False) >= 0 and not is_rcorner_inside \
-                    or cv2.pointPolygonTest(self.outside_polygons[i], right_corner, False) >= 0 and not is_lcorner_inside:
-                    if obj_id in self.inside[i]:
-                        self.visitors[i] += 1
-                        self.time_spent[i].append((self.count - self.entry_times[i][obj_id]) / self.fps)
-                        self.inside[i].discard(obj_id)
-                        self.entry_times[i].pop(obj_id, None)
+            for polygon in self.outside_polygons:
+                polygon_trunc = polygon[polygon != NULLPOINT].reshape(-1, 2)
+
+                if cv2.pointPolygonTest(polygon_trunc, left_corner, False) >= 0 and not is_rcorner_inside_any \
+                    or cv2.pointPolygonTest(polygon_trunc, right_corner, False) >= 0 and not is_lcorner_inside_any:
+                    
+                    for i, _ in enumerate(self.inside_polygons):
+                        if obj_id in self.inside[i]:
+                            self.visitors[i] += 1
+                            self.time_spent[i].append((self.count - self.entry_times[i][obj_id]) / self.fps)
+                            self.inside[i].discard(obj_id)
+                            self.entry_times[i].pop(obj_id, None)
+                    return
         except Exception as e:
             logging.error(f"Error in checking for intersections: {e}")
+            raise
 
     def _visualize_frame(self, frame):
         """Visualize frames if self.visual == True."""
         cvzone.putTextRect(frame, f"VISITED: {self.visitors}", (50, 60), 2, 2)
         cvzone.putTextRect(frame, f"INSIDE: {self.inside}", (50, 160), 2, 2)
         for polygon in self.inside_polygons:
-            cv2.polylines(frame, [polygon], True, (0, 255, 0), 2)
+            polygon_trunc = polygon[polygon != NULLPOINT].reshape(-1, 2)
+            cv2.polylines(frame, [polygon_trunc], True, (0, 255, 0), 2)
         for polygon in self.outside_polygons:
-            cv2.polylines(frame, [polygon], True, (0, 0, 255), 2)
+            polygon_trunc = polygon[polygon != NULLPOINT].reshape(-1, 2)
+            cv2.polylines(frame, [polygon_trunc], True, (0, 0, 255), 2)
         self.out.write(frame)
 
     def _finalize_tracking(self) -> None:

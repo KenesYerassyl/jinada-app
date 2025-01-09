@@ -142,7 +142,7 @@ def main() -> None:
         watcher.fileChanged.connect(lambda: setup_qss(app))
 
         setup_platform_specific_settings(app)
-
+        
         window = MainWindow()
         window.setWindowIcon(QIcon(paths.Paths.MACOSX_ICON))
         window.show()

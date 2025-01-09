@@ -3,6 +3,9 @@ from threading import Lock
 from utils.video_processing_worker import VideoProcessingWorker
 import logging
 
+# TODO: make cancel emit to worker class
+# NOTE: COMMUNICATION BETWEEN THREADS MUST BE DONE THROUGH SIGNALS AND SLOTS !!!
+
 class Singleton(type(QObject), type):
     """Metaclass for Singleton pattern implementation."""
     _lock = Lock()

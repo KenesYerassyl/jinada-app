@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QListWidgetItem,
     QProgressBar,
+    QAbstractItemView
 )
 from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtCore import QSize, pyqtSignal, Qt
@@ -82,6 +83,7 @@ class RecordListWidget(QListWidget):
         self.object_id = object_id
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         CentralVideoProcessingManager().progress_updated.connect(self.record_updated)
         CentralVideoProcessingManager().finished.connect(
             self.record_finished_processing
@@ -95,6 +97,7 @@ class RecordListWidget(QListWidget):
             if self.object_id in CentralVideoProcessingManager().tasks:
                 for task in CentralVideoProcessingManager().tasks[self.object_id]:
                     in_progress[task["record_id"]] = task["progress"]
+
             records = get_all_records_for_list(self.object_id)
             for record in records:
                 new_list_item = RecordListItem(record[0], record[1], record[2], record[3])
