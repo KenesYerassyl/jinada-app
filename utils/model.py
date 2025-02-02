@@ -8,6 +8,7 @@ class Model:
         self.model = YOLO(Paths.YOLO_MODEL_PATH)
         self.class_name = 0
         self.confidence = 0.4
+        self.batch_size = 16
         self.gpu_init()
 
     def gpu_init(self):
@@ -26,6 +27,4 @@ class Model:
         predictions = self.model.track(
             frame, persist=True, tracker="bytetrack.yaml", verbose=False, classes=self.class_name, conf=self.confidence
         )
-        if predictions[0].boxes.data.numel() == 0:
-            return None
         return predictions

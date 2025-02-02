@@ -122,6 +122,9 @@ class VideoProcessingWorker(QRunnable):
                 raise ValueError("No video has been loaded: video is None")
             if self.inside_polygons is None or self.outside_polygons is None:
                 raise ValueError("Polygons have not been set: either inside_polygons or outside_polygons is None.")
+            
+            frames = []
+
             while True:
                 if self._is_canceled:
                     break
@@ -140,22 +143,20 @@ class VideoProcessingWorker(QRunnable):
                 if self.count % 4 != 0:
                     continue # Skip processing most frames for efficiency
 
-                results = self.model.predict(frame)
-                if results is None:
-                    continue # Skip if no results from the model
-                
-                boxes = results[0].boxes.xywh.cpu()
-                if not results[0].boxes.is_track:
-                    continue # Skip if no track ids
-        
-                track_ids = results[0].boxes.id.int().cpu().tolist()
-
-                for box, track_id in zip(boxes, track_ids):
-                    x, y, w, h = (int(box[0].item()), int(box[1].item()), int(box[2].item()), int(box[3].item()))
-                    self._check_for_intersections((int(x - w/2), int(y + h/2)), (int(x + w/2), int(y + h/2)), track_id)
-
-                if self.visual:
-                    self._visualize_frame(results[0].plot())
+                frames.append(frame)
+                if len(frames) == self.model.batch_size:
+                    results = self.model.predict(frames)
+                    for i in range(self.model.batch_size):
+                        if results[i] is None or not results[i].boxes.is_track:
+                            continue
+                        boxes = results[i].boxes.xyxy.cpu().tolist()
+                        track_ids = results[i].boxes.id.int().cpu().tolist()
+                        for box, track_id in zip(boxes, track_ids):
+                            x1, _, x2, y2 = map(int, box)
+                            self._check_for_intersections((x1, y2), (x2, y2), track_id)
+                        if self.visual:
+                            self._visualize_frame(results[i].plot())
+                    frames.clear()
 
                 if cv2.waitKey(1) & 0xFF == 27:
                     break
@@ -183,35 +184,23 @@ class VideoProcessingWorker(QRunnable):
             obj_id (int): Unique ID of the tracked object.
         """
         try:
-            is_lcorner_inside_any = False # False if left corner lies inside of any in-polygon, True if otherwise
-            is_rcorner_inside_any = False # False if right corner lies inside of any in-polygon, True if otherwise
             for i, polygon in enumerate(self.inside_polygons):
                 polygon_trunc = polygon[polygon != NULLPOINT].reshape(-1, 2)
 
-                is_lcorner_inside_this = cv2.pointPolygonTest(polygon_trunc, left_corner, False) >= 0
-                is_rcorner_inside_this = cv2.pointPolygonTest(polygon_trunc, right_corner, False) >= 0
-                is_lcorner_inside_any = is_lcorner_inside_any or is_lcorner_inside_this
-                is_rcorner_inside_any = is_rcorner_inside_any or is_rcorner_inside_this
+                is_lcorner_inside = cv2.pointPolygonTest(polygon_trunc, left_corner, False) >= 0
+                is_rcorner_inside = cv2.pointPolygonTest(polygon_trunc, right_corner, False) >= 0
 
-                if is_lcorner_inside_this and is_rcorner_inside_this:
+                if is_lcorner_inside and is_rcorner_inside:
                     if obj_id not in self.inside[i]:
                         self.inside[i].add(obj_id)
                         self.entry_times[i][obj_id] = self.count
-                        return
-
-            for polygon in self.outside_polygons:
-                polygon_trunc = polygon[polygon != NULLPOINT].reshape(-1, 2)
-
-                if cv2.pointPolygonTest(polygon_trunc, left_corner, False) >= 0 and not is_rcorner_inside_any \
-                    or cv2.pointPolygonTest(polygon_trunc, right_corner, False) >= 0 and not is_lcorner_inside_any:
+                elif not is_lcorner_inside and not is_rcorner_inside:  # Both corners are outside
+                    if obj_id in self.inside[i]:  # Ensure obj_id was previously inside
+                        self.visitors[i] += 1
+                        self.time_spent[i].append((self.count - self.entry_times[i][obj_id]) / self.fps)
+                        self.inside[i].discard(obj_id)
+                        self.entry_times[i].pop(obj_id, None)
                     
-                    for i, _ in enumerate(self.inside_polygons):
-                        if obj_id in self.inside[i]:
-                            self.visitors[i] += 1
-                            self.time_spent[i].append((self.count - self.entry_times[i][obj_id]) / self.fps)
-                            self.inside[i].discard(obj_id)
-                            self.entry_times[i].pop(obj_id, None)
-                    return
         except Exception as e:
             logging.error(f"Error in checking for intersections: {e}")
             raise

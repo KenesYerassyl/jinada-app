@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 from db.object import Base
 import paths
 
+#TODO: Start processing videos, upon launching the app
 
 def get_log_file_path() -> Path:
     """
