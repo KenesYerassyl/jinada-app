@@ -17,9 +17,9 @@ class Error:
         return cls._instance
 
     def _initialize(self):
-        self.ERROR_DURING_UPLOAD = QCoreApplication.translate(
-            "ObjectUploaderDialog", "Error during uploding"
-        )
+        self.ERROR_DURING_UPLOAD = QCoreApplication.translate("ObjectUploaderDialog", "Error during uploding")
+        self.ERROR_DURING_MODIFICATION = QCoreApplication.translate("ObjectModifierDialog", "Error during modification")
+        self.ERROR_DURING_MODIFICATION_DESCRIPTION = QCoreApplication.translate("ObjectModifierDialog", "Polygons are missing or name is empty.")
 
 class AppLabels:
     _instance = None
@@ -47,9 +47,6 @@ class AppLabels:
             "ObjectModifierDialog", "Upload"
         )
         self.BACK_BUTTON = QCoreApplication.translate("ObjectModifierDialog", "Back")
-        self.OUT_FRAME_BUTTON = QCoreApplication.translate(
-            "ObjectModifierDialog", "Add out-frame"
-        )
         self.IN_FRAME_BUTTON = QCoreApplication.translate(
             "ObjectModifierDialog", "Add in-frame"
         )

@@ -114,14 +114,7 @@ class ObjectView(ShadowedWidget):
             painter = QPainter(self.pixmap)
 
             painter.setPen(QPen(Qt.GlobalColor.blue, 2))
-            for polygon in object["in_frame"]:
-                frame_polygon = QPolygonF()
-                for points in polygon:
-                    frame_polygon.append(QPointF(points[0], points[1]))
-                painter.drawPolygon(frame_polygon)
-
-            painter.setPen(QPen(Qt.GlobalColor.green, 2))
-            for polygon in object["out_frame"]:
+            for polygon in object["in_frames"]:
                 frame_polygon = QPolygonF()
                 for points in polygon:
                     frame_polygon.append(QPointF(points[0], points[1]))
@@ -143,15 +136,14 @@ class ObjectView(ShadowedWidget):
             "",
             object["frame_path"],
             object["name"],
-            object["in_frame"],
-            object["out_frame"],
+            object["in_frames"],
             parent=self,
         )
         object_modifier_dialog.object_modified.connect(self.modify_object)
         object_modifier_dialog.open()
 
-    def modify_object(self, name, file_path, frame_path, in_frame, out_frame):
-        update_object_by_id(self.records_list.object_id, name, in_frame, out_frame)
+    def modify_object(self, name, file_path, frame_path, in_frames):
+        update_object_by_id(self.records_list.object_id, name, in_frames)
         self.load_object(self.records_list.object_id)
 
     def date_picker_button_clicked(self):
@@ -166,6 +158,7 @@ class ObjectView(ShadowedWidget):
             for i, record in enumerate(records):
                 np_data = np.load(Paths.record_data_npz(record_id=record["record_id"]), allow_pickle=True)
                 records[i]["visitors"] = np.sum(np_data["visitors"])
+            # TODO: Replace hardcoded keys
             data = {
                 "Название": [record["object_name"] for record in records],
                 "ID": [record["record_id"] for record in records],

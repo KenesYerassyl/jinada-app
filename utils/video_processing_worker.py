@@ -29,8 +29,8 @@ class VideoProcessingWorker(QRunnable):
 
         object = get_object_by_id(object_id)
         record = get_record_by_id(record_id)
-        self._set_attrs(len(object["in_frame"]))
-        self._set_polygons(record["file_path"], object["in_frame"], object["out_frame"])
+        self._set_attrs(len(object["in_frames"]))
+        self._set_polygons(record["file_path"], object["in_frames"])
 
     def cancel(self):
         """Cancel the current process"""
@@ -56,7 +56,7 @@ class VideoProcessingWorker(QRunnable):
             logging.error(f"Unexpected error occurred while setting polygons: {e}")
             raise
 
-    def _set_polygons(self, video_path: str, in_polygon: List[List[Tuple[int, int]]], out_polygon: List[List[Tuple[int, int]]]) -> None:
+    def _set_polygons(self, video_path: str, in_polygon: List[List[Tuple[int, int]]]) -> None:
         """
         Access and initialize the video the set its properties
         """
@@ -81,7 +81,6 @@ class VideoProcessingWorker(QRunnable):
             
 
             self.inside_polygons = self._preprocess_polygons(in_polygon, width_aspect, height_aspect)
-            self.outside_polygons = self._preprocess_polygons(out_polygon, width_aspect, height_aspect)
 
             logging.info("Polygons have been set successfully.")
         except ValueError as ve:
@@ -120,8 +119,8 @@ class VideoProcessingWorker(QRunnable):
         try:
             if self.video is None:
                 raise ValueError("No video has been loaded: video is None")
-            if self.inside_polygons is None or self.outside_polygons is None:
-                raise ValueError("Polygons have not been set: either inside_polygons or outside_polygons is None.")
+            if self.inside_polygons is None:
+                raise ValueError("Polygons have not been set: inside_polygons is None.")
             
             frames = []
 
@@ -212,9 +211,6 @@ class VideoProcessingWorker(QRunnable):
         for polygon in self.inside_polygons:
             polygon_trunc = polygon[polygon != NULLPOINT].reshape(-1, 2)
             cv2.polylines(frame, [polygon_trunc], True, (0, 255, 0), 2)
-        for polygon in self.outside_polygons:
-            polygon_trunc = polygon[polygon != NULLPOINT].reshape(-1, 2)
-            cv2.polylines(frame, [polygon_trunc], True, (0, 0, 255), 2)
         self.out.write(frame)
 
     def _finalize_tracking(self) -> None:

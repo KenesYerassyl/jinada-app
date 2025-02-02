@@ -132,8 +132,7 @@ def get_object_by_id(object_id: int):
                     "name": obj.name,
                     "date_created": obj.date_created,
                     "frame_path": obj.frame_path,
-                    "in_frame": obj.in_frame,
-                    "out_frame": obj.out_frame,
+                    "in_frames": obj.in_frames,
                 }
             else:
                 logging.warning(f"Object with ID {object_id} not found.")
@@ -165,7 +164,7 @@ def get_record_by_id(record_id: int):
         logging.error(f"Error retrieving record {record_id}: {e}")
         raise
 
-def update_object_by_id(object_id: int, name: str, in_frame: List[List[Tuple[int, int]]], out_frame: List[List[Tuple[int, int]]]):
+def update_object_by_id(object_id: int, name: str, in_frames: List[List[Tuple[int, int]]]):
     """
     Update the details of an object by its ID.
     """
@@ -174,8 +173,7 @@ def update_object_by_id(object_id: int, name: str, in_frame: List[List[Tuple[int
             obj = session.query(Object).filter_by(id=object_id).first()
             if obj:
                 obj.name = name
-                obj.in_frame = in_frame
-                obj.out_frame = out_frame
+                obj.in_frames = in_frames
                 logging.info(f"Object {object_id} updated.")
             else:
                 logging.warning(f"Object with ID {object_id} not found.")

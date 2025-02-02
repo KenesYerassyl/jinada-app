@@ -86,8 +86,8 @@ class ObjectListWidget(QListWidget):
             logging.error(f"Error while loading data to Object List: {e}")
             
 
-    def add_object(self, name: str, file_path: str, frame_path: str, in_frame: List[List[Tuple[int, int]]], out_frame: List[List[Tuple[int, int]]]):
-        object = Object(name, frame_path, in_frame, out_frame)
+    def add_object(self, name: str, file_path: str, frame_path: str, in_frames: List[List[Tuple[int, int]]]):
+        object = Object(name, frame_path, in_frames)
         object_record = ObjectRecord(file_path)
         try:
             object_id = insert_object(object)

@@ -13,8 +13,7 @@ class Object(Base):
     name = Column(String, nullable=False)
     frame_path = Column(String, nullable=True)
     date_created = Column(DateTime, default=datetime.now())
-    in_frame = Column(JSON, nullable=True)
-    out_frame = Column(JSON, nullable=True)
+    in_frames = Column(JSON, nullable=True)
 
     records = relationship(
         "ObjectRecord",
@@ -26,15 +25,13 @@ class Object(Base):
         self,
         name="",
         frame_path="",
-        in_frame=None,
-        out_frame=None,
+        in_frames=None,
         date_created=None,
     ):
         self.name = name
         self.frame_path = frame_path
         self.date_created = date_created or datetime.now()
-        self.in_frame = in_frame if in_frame else []
-        self.out_frame = out_frame if out_frame else []
+        self.in_frames = in_frames if in_frames else []
 
 
 class ObjectRecord(Base):
