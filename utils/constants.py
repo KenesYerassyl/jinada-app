@@ -20,6 +20,7 @@ class Error:
         self.ERROR_DURING_UPLOAD = QCoreApplication.translate("ObjectUploaderDialog", "Error during uploding")
         self.ERROR_DURING_MODIFICATION = QCoreApplication.translate("ObjectModifierDialog", "Error during modification")
         self.ERROR_DURING_MODIFICATION_DESCRIPTION = QCoreApplication.translate("ObjectModifierDialog", "Polygons are missing or name is empty.")
+        self.ERROR_DURING_FILE_EXPORTING = QCoreApplication.translate("DataExportingWorker", "Error during file exporting")
 
 class AppLabels:
     _instance = None
@@ -33,12 +34,16 @@ class AppLabels:
     def _initialize(self):
         self.OBJECT_NAME = QCoreApplication.translate("ObjectView", "Object Name")
         self.OBJECT_FRAME = QCoreApplication.translate("ObjectView", "Select an object")
-        self.MODIFY_FRAMES_BUTTON = QCoreApplication.translate(
-            "ObjectView", "Modify Frames"
-        )
-        self.DATE_PICKER_BUTTON = QCoreApplication.translate(
-            "ObjectView", "Export Data"
-        )
+        self.MODIFY_FRAMES_BUTTON = QCoreApplication.translate("ObjectView", "Modify Frames")
+        self.DATE_PICKER_BUTTON = QCoreApplication.translate("ObjectView", "Export Data")
+        self.DATA_EXPORT_NAME = QCoreApplication.translate("ObjectView", "Name")
+        self.DATA_EXPORT_DATE = QCoreApplication.translate("ObjectView", "ID")
+        self.DATA_EXPORT_INFRAME = QCoreApplication.translate("ObjectView", "In-frame")
+        self.DATA_EXPORT_TIMESPENT_AVG = QCoreApplication.translate("ObjectView", "Time spent in average")
+        self.DATA_EXPORT_TIMESPENT_TOT = QCoreApplication.translate("ObjectView", "Time spent in total")
+        self.DATA_EXPORT_NUMOFVISITORS = QCoreApplication.translate("ObjectView", "Number of visitors")
+        self.DATA_EXPORT_DATES = QCoreApplication.translate("ObjectView", "Dates")
+
         self.OBJECT_MODIFIER_DIALOG_TITLE = QCoreApplication.translate(
             "ObjectModifierDialog", "Object modification"
         )
@@ -52,47 +57,7 @@ class AppLabels:
         )
         self.SHOW_BUTTON = QCoreApplication.translate("DatePickerDialog", "Show")
 
-        self.BAR_GRAPH1 = QCoreApplication.translate(
-            "DataPresenterWidget", "Total number of visitors on each Exhibit"
-        )
-        self.BAR_GRAPH2 = QCoreApplication.translate(
-            "DataPresenterWidget", "Average number of visitors on each Exhibit"
-        )
-        self.BAR_GRAPH3 = QCoreApplication.translate(
-            "DataPresenterWidget", "Average time spent on each Exhibit"
-        )
 
-        self.BAR_GRAPH_VISITORS_YLABEL = QCoreApplication.translate(
-            "DataPresenterWidget", "Number of visitors"
-        )
-        self.BAR_GRAPH_TIME_YLABEL = QCoreApplication.translate(
-            "DataPresenterWidget", "Average Time (min)"
-        )
-        self.BAR_GRAPH_XLABEL = QCoreApplication.translate(
-            "DataPresenterWidget", "Exhibits"
-        )
-
-        self.LINE_GRAPH1 = QCoreApplication.translate(
-            "DataPresenterWidget", "Change of total number of visitors on each Exhibit"
-        )
-        self.LINE_GRAPH2 = QCoreApplication.translate(
-            "DataPresenterWidget", "Change of average number of visitors on each Exhibit"
-        )
-        self.LINE_GRAPH3 = QCoreApplication.translate(
-            "DataPresenterWidget", "Change of average time spent on each Exhibit"
-        )
-
-        self.LINE_GRAPH_TIME_YLABEL = QCoreApplication.translate(
-            "DataPresenterWidget", "Average Time (min)"
-        )
-        self.LINE_GRAPH_VISITORS_YLABEL = QCoreApplication.translate(
-            "DataPresenterWidget", "Number of Visitors"
-        )
-        self.LINE_GRAPH_XLABEL = QCoreApplication.translate(
-            "DataPresenterWidget", "Selected time period"
-        )
-
-        self.EXHIBIT = QCoreApplication.translate("DataPresenterWidget", "Exhibit")
         self.OBJECT_LIST = QCoreApplication.translate("ObjectsContainer", "Objects")
         self.OBJECT_UPLOADER_DIALOG_TITLE = QCoreApplication.translate(
             "ObjectUploaderDialog", "New object upload"

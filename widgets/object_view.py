@@ -5,28 +5,21 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QHBoxLayout,
     QWidget,
-    QFileDialog
+    QFileDialog,
+    QMessageBox
 )
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QPolygonF
-from PyQt6.QtCore import Qt, QPointF
-from db.db import (
-    get_object_by_id,
-    update_object_by_id,
-    get_all_records_for_export
-)
+from PyQt6.QtCore import Qt, QPointF, QThread
+from db.db import get_object_by_id, update_object_by_id
 from utils.pyqtgui_utils import rescale_pixmap
 from utils.constants import AppLabels
 from widgets.file_upload import FileUploadWidget
 from widgets.object_modifier import ObjectModifierDialog
 from widgets.date_picker import DatePickerDialog
-# from widgets.data_presenter import DataPresenterWidget
 from widgets.record_list import RecordListWidget
 from widgets.shadowed_widget import ShadowedWidget
 import logging
-import pandas as pd
-from paths import Paths
-import numpy as np
-
+from utils.data_exporting_worker import DataExportingWorker
 
 class ObjectView(ShadowedWidget):
 
@@ -148,35 +141,35 @@ class ObjectView(ShadowedWidget):
 
     def date_picker_button_clicked(self):
         date_picker_dialog = DatePickerDialog(self)
-        date_picker_dialog.date_picked.connect(self.show_data)
+        date_picker_dialog.date_picked.connect(self.get_filepath)
         date_picker_dialog.open()
 
-    def show_data(self, start_date, end_date):
-        try:
-            records = get_all_records_for_export()
-            records = [record for record in records if record["is_processed"]]
-            for i, record in enumerate(records):
-                np_data = np.load(Paths.record_data_npz(record_id=record["record_id"]), allow_pickle=True)
-                records[i]["visitors"] = np.sum(np_data["visitors"])
-            # TODO: Replace hardcoded keys
-            data = {
-                "Название": [record["object_name"] for record in records],
-                "ID": [record["record_id"] for record in records],
-                "Кол-во посетителей": [record["visitors"] for record in records],
-                "Дата": [record["date_uploaded"].strftime("%Y-%m-%d %H:%M:%S") for record in records],
-            }
-            df = pd.DataFrame(data)
-            file_path, _ = QFileDialog.getSaveFileName(self, "Save Excel File", "", "Excel Files (*.xlsx);;All Files (*)")
-            if file_path:
-                df.to_excel(file_path, index=False)
-        except Exception as e:
-            logging.error(f"Error trying to export statistics: {e}")
-        finally:
-            logging.info(f"Success! Excel file saved to:\n{file_path}")
-        # self.date_presenter = DataPresenterWidget(
-        #     self.records_list.object_id, start_date, end_date
-        # )
-        # self.date_presenter.show()
+    def get_filepath(self, start_date, end_date):
+        self.thread = QThread()
+
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save Excel File", "", "Excel Files (*.xlsx);;All Files (*)")
+
+        if file_path:
+            self.worker = DataExportingWorker(start_date, end_date, self.records_list.object_id, file_path)
+            self.worker.moveToThread(self.thread)
+
+            self.worker.finished.connect(self.on_export_finished)
+            self.worker.error.connect(self.on_export_error)
+            self.thread.started.connect(self.worker.run)
+            self.worker.finished.connect(self.thread.quit)
+            self.worker.finished.connect(self.worker.deleteLater)
+            self.thread.finished.connect(self.thread.deleteLater)
+
+            self.thread.start()
+
+            self.date_picker_button.setEnabled(False)
+
+    def on_export_finished(self):
+        self.date_picker_button.setEnabled(True)
+
+    def on_export_error(self, error_msg):
+        QMessageBox.critical(self, error_msg, buttons=QMessageBox.StandardButton.Ok)
+        self.date_picker_button.setEnabled(True)
 
     def resizeEvent(self, event):
         if self.pixmap is not None:

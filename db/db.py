@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from db.db_fs import delete_file
 from sqlalchemy.orm import joinedload
 from paths import Paths, DB_PATH
+import datetime
 
 
 engine = create_engine(f"sqlite:///{DB_PATH}", echo=False)
@@ -98,24 +99,26 @@ def get_all_records_for_list(object_id: int):
         logging.error(f"Error retrieving records for object {object_id}: {e}")
         raise
 
-def get_all_records_for_export():
+def get_records_for_export(object_id: int, start_date: datetime, end_date: datetime):
     """
-    Retrieve all records.
+    Retrieve all records for a specific object ID within a date range.
     """
     try:
         with get_session() as session:
-            results = (session.query(ObjectRecord, Object.name).join(Object, ObjectRecord.object_id == Object.id).all())
-            data = []
-            for record, parent_name in results:
-                data.append({
-                    "record_id": record.id,
-                    "date_uploaded": record.date_uploaded,
-                    "object_name": parent_name,
-                    "is_processed": record.is_processed
-                })
-            return data
+            results = (
+                session.query(ObjectRecord.id)
+                .filter(
+                    ObjectRecord.object_id == object_id,
+                    ObjectRecord.date_uploaded >= start_date,
+                    ObjectRecord.date_uploaded <= end_date,
+                    ObjectRecord.is_processed == True
+                )
+                .all()
+            )
+            return results
+
     except Exception as e:
-        logging.error(f"Error retrieving all records: {e}")
+        logging.error(f"Error retrieving records for object_id={object_id}: {e}")
         raise
 
 def get_object_by_id(object_id: int):
