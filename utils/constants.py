@@ -37,7 +37,6 @@ class AppLabels:
         self.MODIFY_FRAMES_BUTTON = QCoreApplication.translate("ObjectView", "Modify Frames")
         self.DATE_PICKER_BUTTON = QCoreApplication.translate("ObjectView", "Export Data")
         self.DATA_EXPORT_NAME = QCoreApplication.translate("ObjectView", "Name")
-        self.DATA_EXPORT_DATE = QCoreApplication.translate("ObjectView", "ID")
         self.DATA_EXPORT_INFRAME = QCoreApplication.translate("ObjectView", "In-frame")
         self.DATA_EXPORT_TIMESPENT_AVG = QCoreApplication.translate("ObjectView", "Time spent in average")
         self.DATA_EXPORT_TIMESPENT_TOT = QCoreApplication.translate("ObjectView", "Time spent in total")
