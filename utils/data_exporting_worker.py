@@ -24,11 +24,13 @@ class DataExportingWorker(QObject):
     def export_data(self) -> None:
         try:
             try:
+                start_datetime = datetime.datetime.combine(self.start_date, datetime.datetime.min.time())
+                end_datetime = datetime.datetime.combine(self.end_date, datetime.datetime.min.time())
+
                 object_info = get_object_by_id(self.object_id)
-                records = get_records_for_export(self.object_id, self.start_date, self.end_date)
+                records = get_records_for_export(self.object_id, start_datetime, end_datetime)
             except Exception as e:
                 raise Exception(f"Error getting object info or records: {e}")
-            
             data: Dict[str, List] = {
                 AppLabels().DATA_EXPORT_NAME: [object_info["name"]],
                 AppLabels().DATA_EXPORT_DATES: [self.start_date.strftime("%Y-%m-%d %H:%M:%S"), self.end_date.strftime("%Y-%m-%d %H:%M:%S")],

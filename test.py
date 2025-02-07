@@ -1,7 +1,7 @@
 import numpy as np
 from paths import Paths
 from datetime import datetime, timedelta
-from db.db import insert_record
+from db.db import insert_record, get_records_for_export
 from db.object import ObjectRecord
 from PyQt6.QtCore import QStandardPaths
 import os
@@ -43,3 +43,6 @@ def generate_records():
         days += timedelta(1)
 
 # generate_records()
+
+date = datetime(2024, 11, 1)
+records = get_records_for_export(1, date, date)

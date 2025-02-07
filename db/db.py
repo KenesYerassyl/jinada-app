@@ -99,11 +99,13 @@ def get_all_records_for_list(object_id: int):
         logging.error(f"Error retrieving records for object {object_id}: {e}")
         raise
 
-def get_records_for_export(object_id: int, start_date: datetime, end_date: datetime):
+def get_records_for_export(object_id: int, start_date: datetime.datetime, end_date: datetime.datetime):
     """
     Retrieve all records for a specific object ID within a date range.
     """
     try:
+        # start_date = start_date.replace(hour=0, minute=0, second=0)
+        # end_date = end_date.replace(hour=0, minute=0, second=0)
         with get_session() as session:
             results = (
                 session.query(ObjectRecord.id)

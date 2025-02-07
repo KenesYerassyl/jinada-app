@@ -18,8 +18,9 @@ from widgets.object_modifier import ObjectModifierDialog
 from widgets.date_picker import DatePickerDialog
 from widgets.record_list import RecordListWidget
 from widgets.shadowed_widget import ShadowedWidget
-import logging
 from utils.data_exporting_worker import DataExportingWorker
+import datetime
+import logging
 
 class ObjectView(ShadowedWidget):
 
@@ -144,7 +145,7 @@ class ObjectView(ShadowedWidget):
         date_picker_dialog.date_picked.connect(self.get_filepath)
         date_picker_dialog.open()
 
-    def get_filepath(self, start_date, end_date):
+    def get_filepath(self, start_date: datetime.date, end_date: datetime.date):
         self.thread = QThread()
 
         file_path, _ = QFileDialog.getSaveFileName(self, "Save Excel File", "", "Excel Files (*.xlsx);;All Files (*)")
