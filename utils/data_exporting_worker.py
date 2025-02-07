@@ -25,7 +25,7 @@ class DataExportingWorker(QObject):
         try:
             try:
                 object_info = get_object_by_id(self.object_id)
-                records = get_records_for_export(self.start_date, self.end_date, self.object_id)
+                records = get_records_for_export(self.object_id, self.start_date, self.end_date)
             except Exception as e:
                 raise Exception(f"Error getting object info or records: {e}")
             
@@ -39,10 +39,10 @@ class DataExportingWorker(QObject):
             }
 
             max_num_of_frames = 0
-
             for record in records:
                 try:
                     np_data = np.load(Paths.record_data_npz(record_id=record), allow_pickle=True)
+                    np_data = {'visitors': np_data['visitors'], 'time_spent': np_data['time_spent']}
                     np_data["time_spent"] = [np.sum(item) for item in np_data["time_spent"]]
                     max_num_of_frames = max(max_num_of_frames, len(np_data["visitors"]))
                     

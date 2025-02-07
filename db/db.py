@@ -115,6 +115,7 @@ def get_records_for_export(object_id: int, start_date: datetime, end_date: datet
                 )
                 .all()
             )
+            results = [result[0] for result in results]
             return results
 
     except Exception as e:

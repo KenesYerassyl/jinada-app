@@ -168,7 +168,7 @@ class ObjectView(ShadowedWidget):
         self.date_picker_button.setEnabled(True)
 
     def on_export_error(self, error_msg):
-        QMessageBox.critical(self, error_msg, buttons=QMessageBox.StandardButton.Ok)
+        QMessageBox.critical(self, error_msg, None, buttons=QMessageBox.StandardButton.Ok)
         self.date_picker_button.setEnabled(True)
 
     def resizeEvent(self, event):
