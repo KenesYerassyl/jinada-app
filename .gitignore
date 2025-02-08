@@ -6,3 +6,4 @@ models
 main.spec
 build
 dist
+requirements.txt

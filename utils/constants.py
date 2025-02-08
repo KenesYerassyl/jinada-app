@@ -1,8 +1,6 @@
 from PyQt6.QtCore import QCoreApplication
 import os
 
-# TODO add try except blocks
-
 APP_NAME = "Jinada"
 STANDARD_WIDTH = 1280
 

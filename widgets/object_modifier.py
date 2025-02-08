@@ -21,7 +21,6 @@ from utils.constants import AppLabels, Error
 from paths import Paths
 import logging
 
-# TODO: Make sure that name is unique
 # TODO: Make sure that polygon has at least 3 points
 
 class ObjectModifierDialog(QDialog):

@@ -139,7 +139,7 @@ class VideoProcessingWorker(QRunnable):
                     int(self.count / self.video.get(cv2.CAP_PROP_FRAME_COUNT) * 100),
                 )
 
-                if self.count % 4 != 0:
+                if self.count % 3 != 0:
                     continue # Skip processing most frames for efficiency
 
                 frames.append(frame)
