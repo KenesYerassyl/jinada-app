@@ -50,7 +50,7 @@ def setup_logging(disable: bool) -> None:
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
 
-        file_handler = logging.FileHandler(log_file)
+        file_handler = logging.FileHandler(log_file, encoding="utf-8")
         file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         logger.addHandler(file_handler)
 

@@ -42,7 +42,4 @@ def generate_records():
         generate_data(id)
         days += timedelta(1)
 
-# generate_records()
-
-date = datetime(2024, 11, 1)
-records = get_records_for_export(1, date, date)
+generate_records()
