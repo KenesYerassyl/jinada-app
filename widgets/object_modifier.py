@@ -78,8 +78,6 @@ class ObjectModifierDialog(QDialog):
 
     def on_upload(self):
         try:
-            print("Название:", self.name_label.text())
-            print("Каунтер:", self.polygon_drawer.polygon_counter)
 
             if not self.name_label.text() or self.polygon_drawer.polygon_counter <= 0:
                 QMessageBox.critical(
