@@ -78,8 +78,10 @@ class ObjectModifierDialog(QDialog):
 
     def on_upload(self):
         try:
-            
-            if not self.name_label.text() or self.polygon_drawer.polygon_counter == 0:
+            print("Название:", self.name_label.text())
+            print("Каунтер:", self.polygon_drawer.polygon_counter)
+
+            if not self.name_label.text() or self.polygon_drawer.polygon_counter <= 0:
                 QMessageBox.critical(
                     self,
                     Error().ERROR_DURING_MODIFICATION,
@@ -282,6 +284,7 @@ class PolygonDrawer(QWidget):
 
     def draw_existing_polygons(self, in_frames):
         for frame in in_frames:
+            self.polygon_counter += 1
             polygon_group = QGraphicsItemGroup()
             polygon_group.setFlags(
                 QGraphicsItemGroup.GraphicsItemFlag.ItemIsSelectable

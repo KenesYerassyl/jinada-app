@@ -42,4 +42,10 @@ def generate_records():
         generate_data(id)
         days += timedelta(1)
 
-generate_records()
+# generate_records()
+
+for i in range(1, 4):
+    np_data = np.load(Paths.record_data_npz(record_id=i), allow_pickle=True)
+    print(np_data['visitors'])
+    print(np_data['time_spent'])
+    print("-------------------------------")
