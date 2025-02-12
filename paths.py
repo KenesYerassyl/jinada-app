@@ -28,7 +28,7 @@ class Paths:
     ARROW_RIGHT_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "arrow_right.svg")
     TRANSLATIONS_DIR = os.path.join(BASEDIR, RESOURCES, TRANSLATIONS, "app_ru.qm")
     ENCODER_MODEL_FILE = os.path.join(BASEDIR, MODELS, "mars-small128.pb")
-    YOLO_MODEL_PATH = os.path.join(BASEDIR, MODELS, "yolo11m70.pt")
+    YOLO_MODEL_PATH = os.path.join(BASEDIR, MODELS, "yolo11m35_best.pt")
     OBJECT_FRAMES = os.path.join(SECURE_PATH, "object_frame")
     RECORD_DATA_DIR = os.path.join(SECURE_PATH, RECORD_DATA)
 
