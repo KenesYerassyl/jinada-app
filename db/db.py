@@ -75,7 +75,6 @@ def get_all_objects_for_list():
         logging.error(f"Error retrieving objects: {e}")
         raise
 
-
 def get_all_records_for_list(object_id: int):
     """
     Retrieve all records associated with a specific object.
@@ -138,7 +137,7 @@ def get_object_by_id(object_id: int):
                     "name": obj.name,
                     "date_created": obj.date_created,
                     "frame_path": obj.frame_path,
-                    "in_frames": obj.in_frames,
+                    "in_frames": obj.in_frame,
                 }
             else:
                 logging.warning(f"Object with ID {object_id} not found.")
@@ -179,7 +178,7 @@ def update_object_by_id(object_id: int, name: str, in_frames: List[List[Tuple[in
             obj = session.query(Object).filter_by(id=object_id).first()
             if obj:
                 obj.name = name
-                obj.in_frames = in_frames
+                obj.in_frame = in_frames
                 logging.info(f"Object {object_id} updated.")
             else:
                 logging.warning(f"Object with ID {object_id} not found.")
