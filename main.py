@@ -2,7 +2,7 @@
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QFileSystemWatcher, QTranslator, QCoreApplication
 from PyQt6.QtGui import QIcon
-from main_window import MainWindow
+from widgets.main_window import MainWindow
 import sys
 import os
 import logging

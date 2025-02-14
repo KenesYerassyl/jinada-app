@@ -3,6 +3,7 @@ from threading import Lock
 from utils.video_processing_worker import VideoProcessingWorker
 import logging
 import time
+from args import args_instance  
 
 # NOTE: COMMUNICATION BETWEEN THREADS MUST BE DONE THROUGH SIGNALS AND SLOTS !!!
 
@@ -45,7 +46,7 @@ class CentralVideoProcessingManager(QObject, metaclass=Singleton):
             record_id (int): Unique identifier for the record being processed.
         """
         try:
-            worker = VideoProcessingWorker(object_id, record_id)
+            worker = VideoProcessingWorker(object_id, record_id, visual=args_instance.visualize)
             worker.signals.progress_updated.connect(self.on_progress_updated)
             worker.signals.finished.connect(self.on_finished)
             task = {"record_id": record_id, "progress": 0, "worker": worker, "start_time": time.time()}

@@ -206,8 +206,8 @@ class VideoProcessingWorker(QRunnable):
 
     def _visualize_frame(self, frame):
         """Visualize frames if self.visual == True."""
-        cvzone.putTextRect(frame, f"VISITED: {self.visitors}", (50, 60), 2, 2)
-        cvzone.putTextRect(frame, f"INSIDE: {self.inside}", (50, 160), 2, 2)
+        cvzone.putTextRect(frame, f"Visitors: {self.visitors}", (50, 60), 2, 2)
+        # cvzone.putTextRect(frame, f"INSIDE: {self.inside}", (50, 160), 2, 2)
         for polygon in self.inside_polygons:
             polygon_trunc = polygon[polygon != NULLPOINT].reshape(-1, 2)
             cv2.polylines(frame, [polygon_trunc], True, (0, 255, 0), 2)
