@@ -13,9 +13,10 @@ class ZoomPanGraphicsView(QGraphicsView):
         self.setResizeAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
         self.zoom_factor = 1.05
         self.pan_speed = 1
-        self.min_zoom = 0.5
+        self.min_zoom = 0.3
         self.max_zoom = 7.0
-        self.current_zoom = 1.0
+        self.current_zoom = 0.5
+        self.scale(0.5, 0.5)
         # 0 - for regular mode
         # 1 - for panning mode
         self.cursor_mode = 0

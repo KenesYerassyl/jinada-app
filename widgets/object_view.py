@@ -21,6 +21,7 @@ from widgets.shadowed_widget import ShadowedWidget
 from utils.data_exporting_worker import DataExportingWorker
 import datetime
 import logging
+import traceback
 
 class ObjectView(ShadowedWidget):
 
@@ -125,16 +126,19 @@ class ObjectView(ShadowedWidget):
             self.reset()
     
     def modify_frames_button_clicked(self):
-        object = get_object_by_id(self.records_list.object_id)
-        object_modifier_dialog = ObjectModifierDialog(
-            "",
-            object["frame_path"],
-            object["name"],
-            object["in_frames"],
-            parent=self,
-        )
-        object_modifier_dialog.object_modified.connect(self.modify_object)
-        object_modifier_dialog.open()
+        try:
+            object = get_object_by_id(self.records_list.object_id)
+            object_modifier_dialog = ObjectModifierDialog(
+                "",
+                object["frame_path"],
+                object["name"],
+                object["in_frames"],
+                parent=self,
+            )
+            object_modifier_dialog.object_modified.connect(self.modify_object)
+            object_modifier_dialog.open()
+        except Exception as e:
+            logging.error(f"{traceback.format_exc()} Error modifying object with ID {self.records_list.object_id}: {e}")
 
     def modify_object(self, name, file_path, frame_path, in_frames):
         update_object_by_id(self.records_list.object_id, name, in_frames)

@@ -11,7 +11,8 @@ from PyQt6.QtWidgets import (
     QGraphicsItemGroup,
     QGraphicsEllipseItem,
     QLineEdit,
-    QMessageBox
+    QMessageBox,
+    QSizePolicy
 )
 from PyQt6.QtGui import QPixmap, QPen, QBrush, QIcon, QKeyEvent
 from PyQt6.QtCore import Qt, QEvent, QRectF, pyqtSignal
@@ -20,6 +21,7 @@ from utils.pyqtgui_utils import rescale_pixmap, copy_ellipse_item, copy_line_ite
 from utils.constants import AppLabels, Error
 from paths import Paths
 import logging
+import os
 
 # TODO: Make sure that polygon has at least 3 points
 
@@ -139,6 +141,8 @@ class PolygonDrawer(QWidget):
         self.in_frame_button = QPushButton(AppLabels().IN_FRAME_BUTTON)
         self.in_frame_button.clicked.connect(self.activate_polygon_drawing_mode)
         self.in_frame_button.setObjectName("active_button")
+        # self.in_frame_button.setFixedHeight(30)
+        # self.in_frame_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         self.buttons_layout = QHBoxLayout()
         self.buttons_layout.addWidget(self.pan_mode_button)
@@ -162,11 +166,11 @@ class PolygonDrawer(QWidget):
         self.load_image(frame_path)
 
     def load_image(self, frame_path):
+        if not os.path.isfile(frame_path):
+            raise FileNotFoundError(f"File not found: {frame_path}")
         pixmap = rescale_pixmap(QPixmap(frame_path))
-        if pixmap.isNull():
-            return
+
         self.scene.addItem(QGraphicsPixmapItem(pixmap))
-        self.scene.setSceneRect(QRectF(pixmap.rect()))
 
         self.view.setMouseTracking(True)
         self.view.viewport().installEventFilter(self)

@@ -6,11 +6,8 @@ a = Analysis(
     pathex=['.'],
     binaries=[],
     datas=[
-        ('db', 'db'),
         ('models', 'models'),
         ('resources', 'resources'),
-        ('widgets', 'widgets'),
-        ('utils', 'utils'),
     ],
     hiddenimports=['PyQt6.QtWidgets', 'PyQt6.QtGui', 'PyQt6.QtCore'],
     hookspath=[],

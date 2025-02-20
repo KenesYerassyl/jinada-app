@@ -34,12 +34,12 @@ class AppLabels:
         self.OBJECT_FRAME = QCoreApplication.translate("ObjectView", "Select an object")
         self.MODIFY_FRAMES_BUTTON = QCoreApplication.translate("ObjectView", "Modify Frames")
         self.DATE_PICKER_BUTTON = QCoreApplication.translate("ObjectView", "Export Data")
-        self.DATA_EXPORT_NAME = QCoreApplication.translate("ObjectView", "Name")
-        self.DATA_EXPORT_INFRAME = QCoreApplication.translate("ObjectView", "In-frame")
-        self.DATA_EXPORT_TIMESPENT_AVG = QCoreApplication.translate("ObjectView", "Time spent in average")
-        self.DATA_EXPORT_TIMESPENT_TOT = QCoreApplication.translate("ObjectView", "Time spent in total")
-        self.DATA_EXPORT_NUMOFVISITORS = QCoreApplication.translate("ObjectView", "Number of visitors")
-        self.DATA_EXPORT_DATES = QCoreApplication.translate("ObjectView", "Dates")
+        self.DATA_EXPORT_NAME = QCoreApplication.translate("DataExportingWorker", "Name")
+        self.DATA_EXPORT_INFRAME = QCoreApplication.translate("DataExportingWorker", "In-frame")
+        self.DATA_EXPORT_TIMESPENT_AVG = QCoreApplication.translate("DataExportingWorker", "Time spent in average, (min)")
+        self.DATA_EXPORT_TIMESPENT_TOT = QCoreApplication.translate("DataExportingWorker", "Time spent in total, (min)")
+        self.DATA_EXPORT_NUMOFVISITORS = QCoreApplication.translate("DataExportingWorker", "Number of visitors, (persons)")
+        self.DATA_EXPORT_DATES = QCoreApplication.translate("DataExportingWorker", "Dates")
 
         self.OBJECT_MODIFIER_DIALOG_TITLE = QCoreApplication.translate(
             "ObjectModifierDialog", "Object modification"
