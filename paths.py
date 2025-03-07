@@ -26,6 +26,7 @@ class Paths:
     PLUS_CLICKED_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "plus_clicked.svg")
     ARROW_LEFT_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "arrow_left.svg")
     ARROW_RIGHT_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "arrow_right.svg")
+    EDIT_ICON = os.path.join(BASEDIR, RESOURCES, ICONS, "edit.svg")
     TRANSLATIONS_DIR = os.path.join(BASEDIR, RESOURCES, TRANSLATIONS, "app_ru.qm")
     ENCODER_MODEL_FILE = os.path.join(BASEDIR, MODELS, "mars-small128.pb")
     YOLO_MODEL_PATH = os.path.join(BASEDIR, MODELS, "yolo11m35_best.pt")

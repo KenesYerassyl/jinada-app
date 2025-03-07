@@ -3,7 +3,7 @@ import numpy as np
 from typing import List, Tuple
 import cvzone
 from PyQt6.QtCore import QRunnable, pyqtSignal, pyqtSlot, QObject
-from db.db import get_record_by_id, get_object_by_id, update_record_status
+from db.db import get_record_by_id, get_object_by_id, update_record_by_id
 from utils.constants import STANDARD_WIDTH
 from utils.model import Model
 from paths import Paths
@@ -224,7 +224,7 @@ class VideoProcessingWorker(QRunnable):
             time_spent=self.time_spent,
         )
 
-        update_record_status(self.record_id)
+        update_record_by_id(self.record_id, processsing_status=True)
 
         self.signals.finished.emit(self.object_id, self.record_id)
 

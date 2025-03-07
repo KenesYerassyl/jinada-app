@@ -53,8 +53,6 @@ class AppLabels:
             "ObjectModifierDialog", "Add in-frame"
         )
         self.SHOW_BUTTON = QCoreApplication.translate("DatePickerDialog", "Show")
-
-
         self.OBJECT_LIST = QCoreApplication.translate("ObjectsContainer", "Objects")
         self.OBJECT_UPLOADER_DIALOG_TITLE = QCoreApplication.translate(
             "ObjectUploaderDialog", "New object upload"
@@ -70,3 +68,4 @@ class AppLabels:
         self.FILE_UPLOAD_LABEL = QCoreApplication.translate(
             "FileUploadWidget", "Drag and drop a file here or click 'Browse' to select."
         )
+        self.EDIT_RECORD_LABEL = QCoreApplication.translate("RecordListWidget", "Edit record")

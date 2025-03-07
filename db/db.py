@@ -206,23 +206,24 @@ def delete_object_by_id(object_id: int):
         logging.error(f"Error deleting object {object_id}: {e}")
         raise
 
-
-def update_record_status(record_id: int):
+def update_record_by_id(record_id: int, processsing_status: bool = None, new_date: datetime.datetime = None):
     """
-    Update the status of a record to 'processed'.
+    Update a record by its ID.
     """
     try:
         with get_session() as session:
             record = session.query(ObjectRecord).filter_by(id=record_id).first()
             if record:
-                record.is_processed = True
-                logging.info(f"Record {record_id} marked as processed.")
+                if processsing_status is not None:
+                    record.is_processed = processsing_status
+                if new_date is not None:
+                    record.date_uploaded = new_date
+                logging.info(f"Record {record_id} has been updated.")
             else:
                 logging.warning(f"Record with ID {record_id} not found.")
     except Exception as e:
         logging.error(f"Error updating record {record_id}: {e}")
         raise
-
 
 def delete_record_by_id(record_id: int):
     """

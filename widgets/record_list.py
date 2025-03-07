@@ -7,7 +7,9 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QListWidgetItem,
     QProgressBar,
-    QAbstractItemView
+    QAbstractItemView,
+    QDialog,
+    QCalendarWidget,
 )
 from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtCore import QSize, pyqtSignal, Qt
@@ -18,16 +20,19 @@ from db.db import (
     get_all_records_for_list,
     insert_record,
     delete_record_by_id,
+    update_record_by_id
 )
 from datetime import datetime
 from utils.cvpm import CentralVideoProcessingManager
 from paths import Paths
+from utils.constants import AppLabels
 import logging
 
 
 class RecordListItem(QWidget):
 
     delete_clicked = pyqtSignal(int)
+    edit_clicked = pyqtSignal(int)
 
     def __init__(self, record_id: int, file_path: str, date: datetime, is_processed: bool):
         super().__init__()
@@ -42,6 +47,11 @@ class RecordListItem(QWidget):
         vertical_layout1.addWidget(self.file_path)
 
         horizontal_layout1 = QHBoxLayout()
+
+        self.edit_button = QPushButton(icon=QIcon(Paths.EDIT_ICON))
+        self.edit_button.setFixedSize(20, 20)
+        self.edit_button.clicked.connect(self.edit_button_clicked)
+
         self.done_icon = QSvgWidget(Paths.CONFIRM_ICON)
         self.done_icon.setHidden(not is_processed)
         self.done_icon.setFixedSize(20, 20)
@@ -52,6 +62,7 @@ class RecordListItem(QWidget):
 
         horizontal_layout1.addLayout(vertical_layout1)
         horizontal_layout1.addStretch(1)
+        horizontal_layout1.addWidget(self.edit_button)
         horizontal_layout1.addWidget(self.done_icon)
         horizontal_layout1.addWidget(self.delete_button)
 
@@ -68,6 +79,9 @@ class RecordListItem(QWidget):
 
     def delete_button_clicked(self):
         self.delete_clicked.emit(self.record_id)
+
+    def edit_button_clicked(self):
+        self.edit_clicked.emit(self.record_id)
 
     def setProgress(self, new_value: int):
         self.progress_bar.setValue(new_value)
@@ -107,6 +121,7 @@ class RecordListWidget(QListWidget):
                     else:
                         CentralVideoProcessingManager().add_task(self.object_id, record[0])
                 new_list_item.delete_clicked.connect(self.remove_record)
+                new_list_item.edit_clicked.connect(self.edit_record)
                 old_list_item = QListWidgetItem()
                 old_list_item.setSizeHint(QSize(200, 110))
                 self.addItem(old_list_item)
@@ -139,6 +154,28 @@ class RecordListWidget(QListWidget):
                     break
         except Exception as e:
             logging.error(f"Error while deleting a record: {e}")
+
+    def edit_record(self, record_id: int):
+        def open_calendar():
+            dialog = QDialog()
+            dialog.setWindowTitle(AppLabels().EDIT_RECORD_LABEL)
+            layout = QVBoxLayout(dialog)
+            calendar = QCalendarWidget()
+            layout.addWidget(calendar)
+
+            button = QPushButton("OK", dialog)
+            button.clicked.connect(dialog.accept)
+            layout.addWidget(button)
+
+            dialog.setLayout(layout)
+
+            if dialog.exec():
+                return calendar.selectedDate().toPyDate()
+            return None
+        selected_date = open_calendar()
+        if selected_date:
+            update_record_by_id(record_id, new_date=selected_date)
+            self.load_data()
 
     def record_updated(self, object_id: int, record_id: int, progress: int):
         if object_id == self.object_id:
